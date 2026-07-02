@@ -149,20 +149,20 @@
     font-size: 9.5pt;
   }
 
-/* ── TABLE TỐI ƯU THEO TỶ LỆ MỚI ── */
+  /* ── TABLE TỐI ƯU THEO TỶ LỆ MỚI ── */
   table {
     width: 100%;
     border-collapse: collapse;
     font-size: 9pt;
     margin: 2mm 0;
-    table-layout: fixed; /* Khóa cố định layout để ép chia đều tỷ lệ % chính xác */
+    table-layout: fixed; 
   }
 
   th, td {
     border: 1px solid #000;
-    padding: 2mm 1mm; /* Thu hẹp padding tối đa để lấy không gian chứa chữ */
+    padding: 2mm 1mm; 
     vertical-align: middle;
-    word-break: break-word; /* Tự động bẻ dòng khi text vượt quá độ rộng cột */
+    word-break: break-word; 
   }
 
   thead th {
@@ -173,30 +173,26 @@
     line-height: 1.3;
   }
 
-  /* 1. Ép các cột STT, MÃ SP, ĐVT, SỐ LƯỢNG nhỏ khít theo text */
+  /* Điều chỉnh tỷ lệ các cột */
   td.stt, th:nth-child(1) { width: 5%; text-align: center; }
   td.masp, th:nth-child(4) { width: 11%; text-align: center; }
   td.dvt, th:nth-child(6) { width: 6%; text-align: center; }
   
-  /* Cột Số Lượng: Ép chữ SỐ và LƯỢNG tự ngắt dòng, độ rộng khít bằng số tổng cộng */
   td.sl, th:nth-child(7) { 
     width: 7%; 
     text-align: center; 
     font-weight: bold; 
-    white-space: normal; /* Cho phép ngắt dòng chữ tiêu đề */
+    white-space: normal; 
   }
 
-  /* 2. Cột SỐ PO luôn luôn rộng bằng cột LSX-ĐH (mỗi cột chiếm 16%) */
   td.lsx, th:nth-child(2) { width: 16%; text-align: center; }
   td.po,  th:nth-child(3) { width: 16%; text-align: center; }
 
-  /* 3. Cột TÊN CHI TIẾT giảm xuống chứa tối đa ~18 ký tự, tự động ngắt dòng */
   td.ten { 
     text-align: left;   
-    width: 22%; /* Đảm bảo chiều rộng vừa vặn cho 18 ký tự tiêu chuẩn */
+    width: 22%; 
   }
   
-  /* Cột Ghi chú chiếm phần còn lại */
   td.ghichu { 
     text-align: left;   
     width: 17%; 
@@ -334,7 +330,7 @@
 <table>
   <thead>
     <tr>
-      <th>TT</th>
+      <th>MỤC</th>
       <th>LSX-ĐH</th>
       <th>SỐ PO</th>
       <th>MÃ SP</th>
@@ -465,10 +461,10 @@ if (rawItems) {
     if (cleanRow.startsWith(',')) cleanRow = cleanRow.substring(1);
 
     const cols = cleanRow.split('|');
-    if (cols.length < 7) return;
+    if (cols.length < 7) return; // Đổi từ < 6 thành < 7 để khớp cấu trúc mới có [Mục]
 
-// Thứ tự cắt chuỗi mới nhận từ AppSheet: LSX | Mục | Mã SP | Tên SP | ĐVT | SL | PO | Ghi chú
-const [lsx='', muc='', masp='', ten='', dvt='', sl='', po='', ghichu=''] = cols;
+    // Cấu trúc chuỗi từ AppSheet: LSX | Mục | Mã SP | Tên SP | ĐVT | Số lượng | PO | Nội dung
+    const [lsx='', muc='', masp='', ten='', dvt='', sl='', po='', ghichu=''] = cols;
     const slVal = parseFloat(sl) || 0;
     tongSL += slVal;
 
@@ -486,23 +482,23 @@ const [lsx='', muc='', masp='', ten='', dvt='', sl='', po='', ghichu=''] = cols;
     tbody.appendChild(tr);
   });
 } else {
-  // Bản demo tĩnh hiển thị chuẩn như hình mẫu nếu không có URL params
+  // Dữ liệu demo tĩnh chuẩn hóa 8 trường khi chạy trực tiếp không qua URL
   const demo = [
-    ['TBNN.15/06', 'BBGH02072026-AD2-001', 'CKM7-4', 'Bulong 12x50 ren 40 mạ đen', 'CT', 100, 'Kết cấu kệ kho mát 2 - XĐG chuối LP3, LP1, BP2'],
-    ['TBNN.15/06', 'BBGH02072026-AD2-001', 'CKM7-4', 'Bulong 12x50 ren 40 mạ đen', 'CT', 1, 'Kết cấu kệ kho mát 2 - XĐG chuối LP3, LP1, BP2'],
+    ['TBNN.15/06', '1', 'CKM7-4', 'Bulong 12x50 ren 40 mạ đen', 'CT', 100, 'BBGH02072026-AD2-001', 'Kết cấu kệ kho mát 2 - XĐG chuối LP3, LP1, BP2'],
+    ['TBNN.15/06', '2', 'CKM7-4', 'Bulong 12x50 ren 40 mạ đen', 'CT', 1, 'BBGH02072026-AD2-001', 'Kết cấu kệ kho mát 2 - XĐG chuối LP3, LP1, BP2'],
   ];
-  demo.forEach((d, i) => {
+  demo.forEach((d) => {
     tongSL += d[5];
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td class="stt">${i+1}</td>
+      <td class="stt">${d[1]}</td>
       <td class="lsx">${d[0]}</td>
-      <td class="po">${d[1]}</td>
+      <td class="po">${d[6]}</td>
       <td class="masp">${d[2]}</td>
       <td class="ten">${d[3]}</td>
       <td class="dvt">${d[4]}</td>
       <td class="sl">${d[5]}</td>
-      <td class="ghichu">${d[6]}</td>
+      <td class="ghichu">${d[7]}</td>
     `;
     tbody.appendChild(tr);
   });
