@@ -143,12 +143,6 @@
     display: inline-block;
   }
 
-  .field-value-long {
-    border-bottom: 1px solid #000;
-    flex: 1;
-    display: inline-block;
-  }
-
   /* ── INTRO TEXT ── */
   .intro {
     margin: 2mm 0;
@@ -177,13 +171,14 @@
     line-height: 1.4;
   }
 
-  td.stt   { text-align: center; width: 8mm; }
-  td.lsx   { text-align: center; width: 30mm; }
-  td.masp  { text-align: center; width: 28mm; }
-  td.ten   { text-align: left;   width: auto; }
-  td.dvt   { text-align: center; width: 15mm; }
-  td.sl    { text-align: center; width: 22mm; font-weight: bold; }
-  td.ghichu{ text-align: left;   width: 32mm; }
+  td.stt    { text-align: center; width: 8mm; }
+  td.lsx    { text-align: center; width: 25mm; }
+  td.po     { text-align: center; width: 20mm; }
+  td.masp   { text-align: center; width: 25mm; }
+  td.ten    { text-align: left;   width: auto; }
+  td.dvt    { text-align: center; width: 12mm; }
+  td.sl     { text-align: center; width: 18mm; font-weight: bold; }
+  td.ghichu { text-align: left;   width: 28mm; }
 
   .row-total td {
     font-weight: bold;
@@ -319,6 +314,7 @@
     <tr>
       <th>STT</th>
       <th>LSX-ĐH</th>
+      <th>SỐ PO</th>
       <th>MÃ SP</th>
       <th>TÊN CHI TIẾT</th>
       <th>ĐVT</th>
@@ -327,10 +323,10 @@
     </tr>
   </thead>
   <tbody id="table-body">
-    </tbody>
+  </tbody>
   <tfoot>
     <tr class="row-total">
-      <td colspan="5">Tổng cộng</td>
+      <td colspan="6">Tổng cộng</td>
       <td id="tong-sl"></td>
       <td></td>
     </tr>
@@ -433,7 +429,6 @@ if (ngayFmt) set('el-day', ngayFmt);
 else document.getElementById('el-day').textContent = '___/___/______';
 
 // ── ĐIỀN BẢNG HÀNG HÓA ──
-// Định dạng 1 dòng (6 trường): LSX | Mã SP | Tên SP | ĐVT | Số lượng | Ghi chú
 const rawItems = q('items');
 const tbody = document.getElementById('table-body');
 
@@ -448,9 +443,10 @@ if (rawItems) {
     if (cleanRow.startsWith(',')) cleanRow = cleanRow.substring(1);
 
     const cols = cleanRow.split('|');
-    if (cols.length < 5) return;
+    if (cols.length < 6) return;
 
-    const [lsx='', masp='', ten='', dvt='', sl='', ghichu=''] = cols;
+    // Thứ tự cắt chuỗi theo Concatenate mới: LSX | Mã SP | Tên SP | ĐVT | SL | PO | Ghi chú
+    const [lsx='', masp='', ten='', dvt='', sl='', po='', ghichu=''] = cols;
     const slVal = parseFloat(sl) || 0;
     tongSL += slVal;
 
@@ -458,6 +454,7 @@ if (rawItems) {
     tr.innerHTML = `
       <td class="stt">${tbody.children.length + 1}</td>
       <td class="lsx">${lsx}</td>
+      <td class="po">${po}</td>
       <td class="masp">${masp}</td>
       <td class="ten">${ten}</td>
       <td class="dvt">${dvt}</td>
@@ -467,23 +464,23 @@ if (rawItems) {
     tbody.appendChild(tr);
   });
 } else {
-  // Demo mặc định khi không có dữ liệu URL truyền vào
+  // Bản demo tĩnh hiển thị chuẩn như hình mẫu nếu không có URL params
   const demo = [
-    ['TBNN.15/06','8057090204','Bulong 12x50 ren 40 mạ đen','con',48,'Đủ hàng'],
-    ['TBNN.15/06','8072000106','Tán 5 TK','con',12,'Đủ hàng'],
-    ['THUNG-869','8057090414','Tán 6x1.0 TK mạ đen','con',138,'Giao thiếu'],
+    ['TBNN.15/06', 'BBGH02072026-AD2-001', 'CKM7-4', 'Bulong 12x50 ren 40 mạ đen', 'CT', 100, 'Kết cấu kệ kho mát 2 - XĐG chuối LP3, LP1, BP2'],
+    ['TBNN.15/06', 'BBGH02072026-AD2-001', 'CKM7-4', 'Bulong 12x50 ren 40 mạ đen', 'CT', 1, 'Kết cấu kệ kho mát 2 - XĐG chuối LP3, LP1, BP2'],
   ];
   demo.forEach((d, i) => {
-    tongSL += d[4];
+    tongSL += d[5];
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="stt">${i+1}</td>
       <td class="lsx">${d[0]}</td>
-      <td class="masp">${d[1]}</td>
-      <td class="ten">${d[2]}</td>
-      <td class="dvt">${d[3]}</td>
-      <td class="sl">${d[4]}</td>
-      <td class="ghichu">${d[5]}</td>
+      <td class="po">${d[1]}</td>
+      <td class="masp">${d[2]}</td>
+      <td class="ten">${d[3]}</td>
+      <td class="dvt">${d[4]}</td>
+      <td class="sl">${d[5]}</td>
+      <td class="ghichu">${d[6]}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -491,15 +488,15 @@ if (rawItems) {
 
 document.getElementById('tong-sl').textContent = tongSL || '';
 
-// ── TỰ ĐỘNG GỘP Ô (LSX-ĐH VÀ GHI CHÚ) TRÙNG NHAU ──
+// ── TỰ ĐỘNG GỘP Ô (LSX-ĐH, SỐ PO VÀ GHI CHÚ) TRÙNG NHAU ──
 autoMergeTableCells();
 
 function autoMergeTableCells() {
   const tableRows = tbody.getElementsByTagName('tr');
   if (tableRows.length <= 1) return;
 
-  // index 1 = lsx, index 6 = ghichu (sau khi bảng chỉ còn 7 cột)
-  const targetCols = [1, 6];
+  // Cột chỉ định gộp: index 1 (LSX), index 2 (Số PO), index 7 (Ghi chú)
+  const targetCols = [1, 2, 7];
 
   targetCols.forEach((colIdx) => {
     let anchorCell = null;
