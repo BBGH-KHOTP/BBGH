@@ -70,10 +70,18 @@
     color: #333;
   }
 
-  /* ── TITLE ── */
+  /* ── TITLE CONTAINER ── */
+  .title-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 2mm;
+    margin-bottom: 3mm;
+  }
+
   .doc-title {
     text-align: center;
-    margin: 4mm 0 2mm;
+    width: 100%;
   }
 
   .doc-title h1 {
@@ -81,20 +89,23 @@
     font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 1px;
+    margin: 0;
   }
 
   .doc-date-place {
     text-align: right;
+    width: 100%;
     font-style: italic;
     font-size: 9.5pt;
-    margin-bottom: 1mm;
+    margin-top: 1.5mm;
+    margin-bottom: 1.5mm;
   }
 
   .doc-so {
     text-align: center;
+    width: 100%;
     font-size: 10pt;
     font-weight: bold;
-    margin-bottom: 3mm;
   }
 
   /* ── PARTIES ── */
@@ -256,10 +267,8 @@
 
 <button class="btn-print no-print" onclick="window.print()">🖨️ In</button>
 
-<!-- DOC REF ngoài khung, phía trên bên phải -->
 <div class="doc-ref">QT.TOMC.TKVT/06-BM01</div>
 
-<!-- HEADER -->
 <div class="header-wrap">
   <div class="logo-cell">
     <img class="logo-img" src="https://thacoindustries.com/wp-content/uploads/2023/08/LOGO_24-7-2023-01.png" alt="THACO Industries">
@@ -273,14 +282,14 @@
   </div>
 </div>
 
-<!-- TITLE -->
-<div class="doc-title">
-  <h1>Biên Bản Giao Nhận Hàng</h1>
+<div class="title-container">
+  <div class="doc-title">
+    <h1>Biên Bản Giao Nhận Hàng</h1>
+  </div>
+  <div class="doc-date-place" id="el-dateplace">Chu Lai, ngày <span id="el-day"></span></div>
+  <div class="doc-so">SỐ: <span id="el-sohd"></span></div>
 </div>
-<div class="doc-date-place" id="el-dateplace">Chu Lai, ngày <span id="el-day"></span></div>
-<div class="doc-so">SỐ: <span id="el-sohd"></span></div>
 
-<!-- PARTIES -->
 <div class="parties">
   <div><span class="party-title">A. BÊN GIAO: </span><span id="el-bengiao" style="font-weight:bold;">CÔNG TY TNHH TỔ HỢP CƠ KHÍ THACO</span></div>
   <div class="party-row"><span>Địa chỉ:</span><span id="el-diachi-giao">KCN Cơ khí Ô tô Chu Lai Trường Hải - Xã Núi Thành - Thành Phố Đà Nẵng</span></div>
@@ -306,7 +315,6 @@
 
 <div class="intro">Các bên tiến hành giao nhận hàng hóa với nội dung sau:</div>
 
-<!-- TABLE -->
 <table>
   <thead>
     <tr>
@@ -325,8 +333,7 @@
     </tr>
   </thead>
   <tbody id="table-body">
-    <!-- Dữ liệu sẽ được điền bởi JavaScript -->
-  </tbody>
+    </tbody>
   <tfoot>
     <tr class="row-total">
       <td colspan="5">Tổng cộng</td>
@@ -338,11 +345,9 @@
   </tfoot>
 </table>
 
-<!-- FOOTER NOTES -->
 <div class="footer-note">Hàng khô ráo, đúng quy cách</div>
 <div class="footer-note-bold">Ghi chú: - Biên bản này được lập 03 bản, có giá trị pháp lý như nhau, mỗi bên giữ 01 bản</div>
 
-<!-- SIGNATURES -->
 <div class="sig-section">
   <div class="sig-box">
     <div class="sig-title">Bên Giao</div>
@@ -399,7 +404,6 @@ function set(id, val) {
 // ── NGÀY THÁNG ──
 function formatDate(raw) {
   if (!raw) return '';
-  // Hỗ trợ định dạng: dd/mm/yyyy hoặc yyyy-mm-dd hoặc ISO
   let d;
   if (/^\d{2}\/\d{2}\/\d{4}/.test(raw)) {
     const [dd, mm, yyyy] = raw.split('/');
@@ -437,19 +441,24 @@ if (ngayFmt) set('el-day', ngayFmt);
 else document.getElementById('el-day').textContent = '___/___/______';
 
 // ── ĐIỀN BẢNG HÀNG HÓA ──
-// AppSheet truyền dữ liệu dạng:
-//   items=LSX1|MASP1|TEN1|DVT1|SLYC1|SLTX1|KG1||LSX2|MASP2|...
-// Mỗi sản phẩm cách nhau bằng ||, các cột cách nhau bằng |
-
 const rawItems = q('items');
 const tbody = document.getElementById('table-body');
 
 let tongYC = 0, tongTX = 0, tongKG = 0;
 
 if (rawItems) {
-  const rows = rawItems.split('||');
-  rows.forEach((row, i) => {
-    const cols = row.split('|');
+  // Loại bỏ các lỗi phân tách dấu phẩy thừa do hàm AppSheet sinh ra và cắt theo dấu ||
+  const rows = rawItems.replace(/,(\s*\|\|)/g, '$1').split('||');
+  
+  rows.forEach((row) => {
+    let cleanRow = row.trim();
+    // Bỏ qua dòng rỗng hoặc dòng lỗi định dạng phân tách
+    if (!cleanRow || cleanRow === ',') return; 
+    if (cleanRow.startsWith(',')) cleanRow = cleanRow.substring(1);
+
+    const cols = cleanRow.split('|');
+    if (cols.length < 5) return; // Đảm bảo dòng có đủ số lượng cột dữ liệu tối thiểu
+
     const [lsx='', masp='', ten='', dvt='', slyc='', sltx='', kg='', ghichu=''] = cols;
     const yc  = parseFloat(slyc)  || 0;
     const tx  = parseFloat(sltx)  || 0;
@@ -458,7 +467,7 @@ if (rawItems) {
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td class="stt">${i+1}</td>
+      <td class="stt">${tbody.children.length + 1}</td>
       <td class="lsx">${lsx}</td>
       <td class="masp">${masp}</td>
       <td class="ten">${ten}</td>
@@ -471,7 +480,7 @@ if (rawItems) {
     tbody.appendChild(tr);
   });
 } else {
-  // Demo khi không có dữ liệu
+  // Demo mặc định khi không có dữ liệu URL truyền vào
   const demo = [
     ['THUNG-869/06','8057090204','Bulong 12x50 ren 40 mạ đen','con',48,48,0,''],
     ['THUNG-869/06','8072000106','Tán 5 TK','con',12,12,0,''],
