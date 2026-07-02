@@ -463,24 +463,23 @@ if (rawItems) {
     const cols = cleanRow.split('|');
     if (cols.length < 7) return; // Đổi từ < 6 thành < 7 để khớp cấu trúc mới có [Mục]
 
-    // Cấu trúc chuỗi từ AppSheet: LSX | Mục | Mã SP | Tên SP | ĐVT | Số lượng | PO | Nội dung
-    const [lsx='', muc='', masp='', ten='', dvt='', sl='', po='', ghichu=''] = cols;
+// Sửa lại đúng thứ tự các cột được truyền từ AppSheet sang
+const [muc='', lsx='', po='', masp='', ten='', dvt='', sl='', ghichu=''] = cols;
     const slVal = parseFloat(sl) || 0;
     tongSL += slVal;
 
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="stt">${muc}</td>
-      <td class="lsx">${lsx}</td>
-      <td class="po">${po}</td>
-      <td class="masp">${masp}</td>
-      <td class="ten">${ten}</td>
-      <td class="dvt">${dvt}</td>
-      <td class="sl">${sl}</td>
-      <td class="ghichu">${ghichu}</td>
-    `;
-    tbody.appendChild(tr);
-  });
+const tr = document.createElement('tr');
+tr.innerHTML = `
+  <td class="stt">${muc}</td>
+  <td class="lsx">${lsx}</td>
+  <td class="po">${po}</td>
+  <td class="masp">${masp}</td>
+  <td class="ten">${ten}</td>
+  <td class="dvt">${dvt}</td>
+  <td class="sl">${sl}</td>
+  <td class="ghichu">${ghichu}</td>
+`;
+tbody.appendChild(tr);
 } else {
   // Dữ liệu demo tĩnh chuẩn hóa 8 trường khi chạy trực tiếp không qua URL
   const demo = [
