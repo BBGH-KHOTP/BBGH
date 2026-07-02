@@ -165,7 +165,7 @@
 
   th, td {
     border: 1px solid #000;
-    padding: 2mm 2.5mm; /* Tăng padding nhẹ cho bảng thoáng hơn */
+    padding: 2mm 2.5mm;
     vertical-align: middle;
   }
 
@@ -177,13 +177,12 @@
     line-height: 1.4;
   }
 
-  /* Cân đối lại tỷ lệ chiều rộng sau khi bỏ bớt cột */
   td.stt   { text-align: center; width: 8mm; }
   td.lsx   { text-align: center; width: 30mm; }
   td.masp  { text-align: center; width: 28mm; }
   td.ten   { text-align: left;   width: auto; }
   td.dvt   { text-align: center; width: 15mm; }
-  td.sl    { text-align: center; width: 22mm; font-weight: bold; } /* Làm đậm số lượng */
+  td.sl    { text-align: center; width: 22mm; font-weight: bold; }
   td.ghichu{ text-align: left;   width: 32mm; }
 
   .row-total td {
@@ -434,6 +433,7 @@ if (ngayFmt) set('el-day', ngayFmt);
 else document.getElementById('el-day').textContent = '___/___/______';
 
 // ── ĐIỀN BẢNG HÀNG HÓA ──
+// Định dạng 1 dòng (6 trường): LSX | Mã SP | Tên SP | ĐVT | Số lượng | Ghi chú
 const rawItems = q('items');
 const tbody = document.getElementById('table-body');
 
@@ -441,18 +441,17 @@ let tongSL = 0;
 
 if (rawItems) {
   const rows = rawItems.replace(/,(\s*\|\|)/g, '$1').split('||');
-  
+
   rows.forEach((row) => {
     let cleanRow = row.trim();
-    if (!cleanRow || cleanRow === ',') return; 
+    if (!cleanRow || cleanRow === ',') return;
     if (cleanRow.startsWith(',')) cleanRow = cleanRow.substring(1);
 
     const cols = cleanRow.split('|');
-    if (cols.length < 5) return; 
+    if (cols.length < 5) return;
 
-    // Lấy slyc (Số lượng yêu cầu) làm cột số lượng chính, bỏ qua sltx và khối lượng
-    const [lsx='', masp='', ten='', dvt='', slyc='', sltx='', kg='', ghichu=''] = cols;
-    const slVal = parseFloat(slyc) || 0;
+    const [lsx='', masp='', ten='', dvt='', sl='', ghichu=''] = cols;
+    const slVal = parseFloat(sl) || 0;
     tongSL += slVal;
 
     const tr = document.createElement('tr');
@@ -462,7 +461,7 @@ if (rawItems) {
       <td class="masp">${masp}</td>
       <td class="ten">${ten}</td>
       <td class="dvt">${dvt}</td>
-      <td class="sl">${slyc}</td>
+      <td class="sl">${sl}</td>
       <td class="ghichu">${ghichu}</td>
     `;
     tbody.appendChild(tr);
@@ -499,8 +498,8 @@ function autoMergeTableCells() {
   const tableRows = tbody.getElementsByTagName('tr');
   if (tableRows.length <= 1) return;
 
-  // Cấu hình các cột cần gộp mới: index 1 là 'lsx', index 6 là 'ghichu' sau khi bóp gọn cột
-  const targetCols = [1, 6]; 
+  // index 1 = lsx, index 6 = ghichu (sau khi bảng chỉ còn 7 cột)
+  const targetCols = [1, 6];
 
   targetCols.forEach((colIdx) => {
     let anchorCell = null;
