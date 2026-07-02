@@ -149,7 +149,7 @@
     font-size: 9.5pt;
   }
 
-  /* ── TABLE TỐI ƯU THEO TỶ LỆ MỚI ── */
+  /* ── TABLE ── */
   table {
     width: 100%;
     border-collapse: collapse;
@@ -173,9 +173,12 @@
     line-height: 1.3;
   }
 
-  /* Điều chỉnh tỷ lệ các cột */
+  /* Tỷ lệ các cột */
   td.stt, th:nth-child(1) { width: 5%; text-align: center; }
+  td.lsx, th:nth-child(2) { width: 16%; text-align: center; }
+  td.po,  th:nth-child(3) { width: 16%; text-align: center; }
   td.masp, th:nth-child(4) { width: 11%; text-align: center; }
+  td.ten { text-align: left; width: 22%; }
   td.dvt, th:nth-child(6) { width: 6%; text-align: center; }
   
   td.sl, th:nth-child(7) { 
@@ -184,19 +187,8 @@
     font-weight: bold; 
     white-space: normal; 
   }
-
-  td.lsx, th:nth-child(2) { width: 16%; text-align: center; }
-  td.po,  th:nth-child(3) { width: 16%; text-align: center; }
-
-  td.ten { 
-    text-align: left;   
-    width: 22%; 
-  }
   
-  td.ghichu { 
-    text-align: left;   
-    width: 17%; 
-  }
+  td.ghichu { text-align: left; width: 17%; }
 
   .row-total td {
     font-weight: bold;
@@ -461,58 +453,59 @@ if (rawItems) {
     if (cleanRow.startsWith(',')) cleanRow = cleanRow.substring(1);
 
     const cols = cleanRow.split('|');
-    if (cols.length < 7) return; // Đổi từ < 6 thành < 7 để khớp cấu trúc mới có [Mục]
+    if (cols.length < 7) return; 
 
-// Sửa lại đúng thứ tự các cột được truyền từ AppSheet sang
-const [muc='', lsx='', po='', masp='', ten='', dvt='', sl='', ghichu=''] = cols;
+    // Sửa đúng thứ tự nhận chuỗi từ AppSheet: Mục|LSX|PO|MãSP|TênSP|ĐVT|SL|GhiChu
+    const [muc='', lsx='', po='', masp='', ten='', dvt='', sl='', ghichu=''] = cols;
     const slVal = parseFloat(sl) || 0;
     tongSL += slVal;
 
-const tr = document.createElement('tr');
-tr.innerHTML = `
-  <td class="stt">${muc}</td>
-  <td class="lsx">${lsx}</td>
-  <td class="po">${po}</td>
-  <td class="masp">${masp}</td>
-  <td class="ten">${ten}</td>
-  <td class="dvt">${dvt}</td>
-  <td class="sl">${sl}</td>
-  <td class="ghichu">${ghichu}</td>
-`;
-tbody.appendChild(tr);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="stt">${muc}</td>
+      <td class="lsx">${lsx}</td>
+      <td class="po">${po}</td>
+      <td class="masp">${masp}</td>
+      <td class="ten">${ten}</td>
+      <td class="dvt">${dvt}</td>
+      <td class="sl">${sl}</td>
+      <td class="ghichu">${ghichu}</td>
+    `;
+    tbody.appendChild(tr);
+  });
 } else {
   // Dữ liệu demo tĩnh chuẩn hóa 8 trường khi chạy trực tiếp không qua URL
   const demo = [
-    ['TBNN.15/06', '1', 'CKM7-4', 'Bulong 12x50 ren 40 mạ đen', 'CT', 100, 'BBGH02072026-AD2-001', 'Kết cấu kệ kho mát 2 - XĐG chuối LP3, LP1, BP2'],
-    ['TBNN.15/06', '2', 'CKM7-4', 'Bulong 12x50 ren 40 mạ đen', 'CT', 1, 'BBGH02072026-AD2-001', 'Kết cấu kệ kho mát 2 - XĐG chuối LP3, LP1, BP2'],
+    ['1', 'TBNN.15/06', 'BBGH02072026-AD2-001', 'CKM7-4', 'Bulong 12x50 ren 40 mạ đen', 'CT', 100, 'Kết cấu kệ kho mát 2 - XĐG chuối LP3, LP1, BP2'],
+    ['2', 'TBNN.15/06', 'BBGH02072026-AD2-001', 'CKM7-4', 'Bulong 12x50 ren 40 mạ đen', 'CT', 1, 'Kết cấu kệ kho mát 2 - XĐG chuối LP3, LP1, BP2'],
   ];
   demo.forEach((d) => {
-    tongSL += d[5];
+    tongSL += d[6];
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td class="stt">${d[1]}</td>
-      <td class="lsx">${d[0]}</td>
-      <td class="po">${d[6]}</td>
-      <td class="masp">${d[2]}</td>
-      <td class="ten">${d[3]}</td>
-      <td class="dvt">${d[4]}</td>
-      <td class="sl">${d[5]}</td>
+      <td class="stt">${d[0]}</td>
+      <td class="lsx">${d[1]}</td>
+      <td class="po">${d[2]}</td>
+      <td class="masp">${d[3]}</td>
+      <td class="ten">${d[4]}</td>
+      <td class="dvt">${d[5]}</td>
+      <td class="sl">${d[6]}</td>
       <td class="ghichu">${d[7]}</td>
     `;
     tbody.appendChild(tr);
   });
 }
 
-document.getElementById('tong-sl').textContent = tongSL || '';
+document.getElementById('tong-sl').textContent = tongSL || '0';
 
-// ── TỰ ĐỘNG GỘP Ô (LSX-ĐH, SỐ PO VÀ GHI CHÚ) TRÙNG NHAU ──
+// ── TỰ ĐỘNG GỘP Ô CHUẨN XÁC THEO TỪNG CỤM LIÊN TIẾP ──
 autoMergeTableCells();
 
 function autoMergeTableCells() {
   const tableRows = tbody.getElementsByTagName('tr');
   if (tableRows.length <= 1) return;
 
-  // Cột chỉ định gộp: index 1 (LSX), index 2 (Số PO), index 7 (Ghi chú)
+  // Cột gộp: index 1 (LSX), index 2 (Số PO), index 7 (Ghi chú)
   const targetCols = [1, 2, 7];
 
   targetCols.forEach((colIdx) => {
@@ -523,16 +516,24 @@ function autoMergeTableCells() {
       const currentCell = tableRows[i].cells[colIdx];
       if (!currentCell) continue;
 
+      const currentText = currentCell.textContent.trim();
+
       if (anchorCell === null) {
         anchorCell = currentCell;
         spanCount = 1;
-      } else if (currentCell.textContent.trim() === anchorCell.textContent.trim() && anchorCell.textContent.trim() !== '') {
-        spanCount++;
-        anchorCell.rowSpan = spanCount;
-        currentCell.style.display = 'none';
       } else {
-        anchorCell = currentCell;
-        spanCount = 1;
+        const anchorText = anchorCell.textContent.trim();
+        
+        // CHỈ gộp nếu dòng hiện tại bằng dòng gốc ngay phía trên nó và KHÔNG rỗng
+        if (currentText === anchorText && anchorText !== '') {
+          spanCount++;
+          anchorCell.rowSpan = spanCount;
+          currentCell.style.display = 'none';
+        } else {
+          // Gặp cụm dữ liệu mới -> Đặt lại điểm mốc anchor mới
+          anchorCell = currentCell;
+          spanCount = 1;
+        }
       }
     }
   });
