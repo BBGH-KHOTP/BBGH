@@ -465,16 +465,16 @@ if (rawItems) {
     if (cleanRow.startsWith(',')) cleanRow = cleanRow.substring(1);
 
     const cols = cleanRow.split('|');
-    if (cols.length < 6) return;
+    if (cols.length < 7) return;
 
-    // Thứ tự cắt chuỗi theo Concatenate mới: LSX | Mã SP | Tên SP | ĐVT | SL | PO | Ghi chú
-    const [lsx='', masp='', ten='', dvt='', sl='', po='', ghichu=''] = cols;
+// Thứ tự cắt chuỗi mới nhận từ AppSheet: LSX | Mục | Mã SP | Tên SP | ĐVT | SL | PO | Ghi chú
+const [lsx='', muc='', masp='', ten='', dvt='', sl='', po='', ghichu=''] = cols;
     const slVal = parseFloat(sl) || 0;
     tongSL += slVal;
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td class="stt">${tbody.children.length + 1}</td>
+      <td class="stt">${muc}</td>
       <td class="lsx">${lsx}</td>
       <td class="po">${po}</td>
       <td class="masp">${masp}</td>
