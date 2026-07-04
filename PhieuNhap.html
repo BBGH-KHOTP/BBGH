@@ -23,7 +23,6 @@
       font-size: 10.5pt;
     }
     
-    /* Layout chính dùng bảng cố định thay thế Grid/Flex để chống vỡ khi in */
     .layout-table {
       width: 100%;
       border-collapse: collapse;
@@ -44,7 +43,6 @@
       text-align: center;
     }
     
-    /* Định dạng đường cắt */
     .cut-line {
       border-left: 1.5px dashed #444444;
       height: 180mm;
@@ -62,7 +60,6 @@
       font-size: 14pt;
     }
     
-    /* Header thông tin công ty */
     .header-table {
       width: 100%;
       border-collapse: collapse;
@@ -95,7 +92,6 @@
       margin-top: 1mm;
     }
     
-    /* Phần thông tin chung */
     .info-block {
       margin-bottom: 4mm;
       line-height: 1.6;
@@ -118,7 +114,6 @@
       vertical-align: bottom;
     }
     
-    /* Bảng chi tiết vật tư */
     .main-table {
       width: 100%;
       border-collapse: collapse;
@@ -147,7 +142,6 @@
       font-weight: bold;
     }
     
-    /* Chữ ký cuối trang */
     .footer-table {
       width: 100%;
       border-collapse: collapse;
@@ -206,13 +200,13 @@
         
         <div class="title-section">
           <div class="main-title">PHIẾU NHẬP KHO</div>
-          <div class="sub-title">Số: <<[Số BBGH]>></div>
+          <div class="sub-title">Số: <span class="lbl-so-bbgh">...</span></div>
         </div>
         
         <div class="info-block">
-          <div class="info-row"><span class="info-label">- Họ tên người giao:</span> <span class="info-value-dotted" style="width: 68%;"><<[Tên người tạo]>></span></div>
-          <div class="info-row"><span class="info-label">- Lý do nhập kho:</span> <span class="info-value-dotted" style="width: 71%;"><<[Nội dung]>></span></div>
-          <div class="info-row"><span class="info-label">- Xuất tại kho:</span> <span class="info-value-dotted" style="width: 76%;"><<[Địa chỉ]>></span></div>
+          <div class="info-row"><span class="info-label">- Họ tên người giao:</span> <span class="info-value-dotted lbl-nguoilap" style="width: 68%;">...</span></div>
+          <div class="info-row"><span class="info-label">- Lý do nhập kho:</span> <span class="info-value-dotted lbl-lydo" style="width: 71%;">...</span></div>
+          <div class="info-row"><span class="info-label">- Xuất tại kho:</span> <span class="info-value-dotted lbl-kho" style="width: 76%;">...</span></div>
         </div>
         
         <table class="main-table">
@@ -221,30 +215,13 @@
               <th style="width: 7%;">Stt</th>
               <th style="width: 15%;">Mã SP</th>
               <th style="width: 35%;">Tên sản phẩm</th>
-              <th style="width: 11%;">Đơn vị tính</th>
-              <th style="width: 10%;">Số lượng</th>
+              <th style="width: 11%;">ĐV tính</th>
+              <th style="width: 10%;">S.lượng</th>
               <th style="width: 22%;">Ghi chú</th>
             </tr>
           </thead>
-          <tbody>
-            <!-- Vòng lặp lấy dữ liệu chi tiết vật tư từ AppSheet -->
-            <<Start: [Related ChiTietVatTus]>>
-            <tr>
-              <td><<[_RowNumber]>></td>
-              <td><<[Mã SP]>></td>
-              <td class="text-left"><<[Tên SP]>></td>
-              <td><<[Đơn vị tính]>></td>
-              <td><<[Số lượng]>></td>
-              <td><<[QRCode]>></td>
-            </tr>
-            <<End>>
-            
-            <!-- Hàng tổng cộng -->
-            <tr class="font-bold">
-              <td colspan="4">TỔNG CỘNG</td>
-              <td><<SUM([Related ChiTietVatTus][Số lượng])>></td>
-              <td></td>
-            </tr>
+          <tbody class="table-body-lien1">
+            <!-- Dữ liệu JS tự động chèn vào đây -->
           </tbody>
         </table>
         
@@ -261,11 +238,11 @@
               <div class="signature-space"></div>
             </td>
             <td>
-              <span style="font-style: italic; font-size: 9.5pt;">Ngày <<TEXT([Ngày], "DD/MM/YYYY")>></span><br>
+              <span style="font-style: italic; font-size: 9.5pt;">Ngày <span class="lbl-ngay">...</span></span><br>
               <span class="font-bold">Người lập phiếu</span><br>
               <span style="font-style: italic; font-size: 9.5pt;">(Ký, họ tên)</span>
               <div class="signature-space"></div>
-              <div class="signer-name"><&zwj;<<[Tên người tạo]>></div>
+              <div class="signer-name lbl-nguoilap">...</div>
             </td>
           </tr>
         </table>
@@ -277,7 +254,7 @@
         <div class="scissors">✂️</div>
       </td>
       
-      <!-- LIÊN 2: NỬA BÊN PHẢI (SAO CHÉP ĐỒNG BỘ DỮ LIỆU) -->
+      <!-- LIÊN 2: NỬA BÊN PHẢI -->
       <td class="layout-cell">
         <table class="header-table">
           <tr>
@@ -294,13 +271,13 @@
         
         <div class="title-section">
           <div class="main-title">PHIẾU NHẬP KHO</div>
-          <div class="sub-title">Số: <<[Số BBGH]>></div>
+          <div class="sub-title">Số: <span class="lbl-so-bbgh">...</span></div>
         </div>
         
         <div class="info-block">
-          <div class="info-row"><span class="info-label">- Họ tên người giao:</span> <span class="info-value-dotted" style="width: 68%;"><<[Tên người tạo]>></span></div>
-          <div class="info-row"><span class="info-label">- Lý do nhập kho:</span> <span class="info-value-dotted" style="width: 71%;"><<[Nội dung]>></span></div>
-          <div class="info-row"><span class="info-label">- Xuất tại kho:</span> <span class="info-value-dotted" style="width: 76%;"><<[Địa chỉ]>></span></div>
+          <div class="info-row"><span class="info-label">- Họ tên người giao:</span> <span class="info-value-dotted lbl-nguoilap" style="width: 68%;">...</span></div>
+          <div class="info-row"><span class="info-label">- Lý do nhập kho:</span> <span class="info-value-dotted lbl-lydo" style="width: 71%;">...</span></div>
+          <div class="info-row"><span class="info-label">- Xuất tại kho:</span> <span class="info-value-dotted lbl-kho" style="width: 76%;">...</span></div>
         </div>
         
         <table class="main-table">
@@ -309,27 +286,13 @@
               <th style="width: 7%;">Stt</th>
               <th style="width: 15%;">Mã SP</th>
               <th style="width: 35%;">Tên sản phẩm</th>
-              <th style="width: 11%;">Đơn vị tính</th>
-              <th style="width: 10%;">Số lượng</th>
+              <th style="width: 11%;">ĐV tính</th>
+              <th style="width: 10%;">S.lượng</th>
               <th style="width: 22%;">Ghi chú</th>
             </tr>
           </thead>
-          <tbody>
-            <<Start: [Related ChiTietVatTus]>>
-            <tr>
-              <td><<[_RowNumber]>></td>
-              <td><<[Mã SP]>></td>
-              <td class="text-left"><<[Tên SP]>></td>
-              <td><<[Đơn vị tính]>></td>
-              <td><<[Số lượng]>></td>
-              <td><<[QRCode]>></td>
-            </tr>
-            <<End>>
-            <tr class="font-bold">
-              <td colspan="4">TỔNG CỘNG</td>
-              <td><<SUM([Related ChiTietVatTus][Số lượng])>></td>
-              <td></td>
-            </tr>
+          <tbody class="table-body-lien2">
+            <!-- Dữ liệu JS tự động chèn vào đây -->
           </tbody>
         </table>
         
@@ -346,11 +309,11 @@
               <div class="signature-space"></div>
             </td>
             <td>
-              <span style="font-style: italic; font-size: 9.5pt;">Ngày <<TEXT([Ngày], "DD/MM/YYYY")>></span><br>
+              <span style="font-style: italic; font-size: 9.5pt;">Ngày <span class="lbl-ngay">...</span></span><br>
               <span class="font-bold">Người lập phiếu</span><br>
               <span style="font-style: italic; font-size: 9.5pt;">(Ký, họ tên)</span>
               <div class="signature-space"></div>
-              <div class="signer-name"><&zwj;<<[Tên người tạo]>></div>
+              <div class="signer-name lbl-nguoilap">...</div>
             </td>
           </tr>
         </table>
@@ -358,5 +321,85 @@
     </tr>
   </table>
 
+  <!-- ĐOẠN JAVASCRIPT XỬ LÝ ĐỌC DỮ LIỆU TỪ APPSHEET -->
+  <script>
+    function parseUrlData() {
+      const urlParams = new URLSearchParams(window.location.search);
+      
+      const soBBGH = urlParams.get('so') || '';
+      const ngay = urlParams.get('ngay') || '';
+      const nguoilap = urlParams.get('nguoilap') || '';
+      const kho = urlParams.get('kho') || '';
+      const itemsStr = urlParams.get('items') || '';
+
+      // Điền dữ liệu chung lên giao diện cho cả 2 Liên
+      document.querySelectorAll('.lbl-so-bbgh').forEach(el => el.innerText = soBBGH);
+      document.querySelectorAll('.lbl-ngay').forEach(el => el.innerText = ngay);
+      document.querySelectorAll('.lbl-nguoilap').forEach(el => el.innerText = nguoilap);
+      document.querySelectorAll('.lbl-kho').forEach(el => el.innerText = kho);
+
+      // Xử lý chuỗi danh sách vật tư tách bằng dấu '||' và các cột tách bằng dấu '|'
+      if (itemsStr.trim()) {
+        const rows = itemsStr.split('||');
+        let htmlContent = '';
+        let tongSoLuong = 0;
+        let stt = 1;
+        let lyDoGop = []; // Mảng chứa các nội dung để làm lý do nhập kho chung
+
+        rows.forEach(row => {
+          if (row.trim()) {
+            const cols = row.split('|');
+            // Cấu trúc chuỗi nhận được: LSX(0) | Mục(1) | Mã SP(2) | Tên SP(3) | Đơn vị tính(4) | Số lượng(5) | PO(6) | Nội dung(7)
+            if (cols.length >= 6) {
+              const maSP = cols[2] ? cols[2].trim() : '';
+              const tenSP = cols[3] ? cols[3].trim() : '';
+              const dvTinh = cols[4] ? cols[4].trim() : '';
+              const soLuong = parseInt(cols[5]) || 0;
+              const ghiChu = cols[6] ? cols[6].trim() : ''; // Lấy cột PO hoặc QRCode làm ghi chú nếu muốn
+              const noiDungRow = cols[7] ? cols[7].trim() : '';
+
+              if(noiDungRow && !lyDoGop.includes(noiDungRow)) {
+                lyDoGop.push(noiDungRow);
+              }
+
+              tongSoLuong += soLuong;
+
+              htmlContent += `
+                <tr>
+                  <td>${stt++}</td>
+                  <td>${maSP}</td>
+                  <td class="text-left">${tenSP}</td>
+                  <td>${dvTinh}</td>
+                  <td>${soLuong.toLocaleString('vi-VN')}</td>
+                  <td>${ghiChu}</td>
+                </tr>
+              `;
+            }
+          }
+        });
+
+        // Điền lý do nhập kho tổng hợp được từ các hàng chi tiết
+        document.querySelectorAll('.lbl-lydo').forEach(el => el.innerText = lyDoGop.join(', '));
+
+        // Thêm hàng Tổng cộng cuối bảng
+        const totalRowHtml = `
+          <tr class="font-bold">
+            <td colspan="4">TỔNG CỘNG</td>
+            <td>${tongSoLuong.toLocaleString('vi-VN')}</td>
+            <td></td>
+          </tr>
+        `;
+        
+        htmlContent += totalRowHtml;
+
+        // Đổ toàn bộ hàng vào bảng của cả Liên 1 và Liên 2
+        document.querySelector('.table-body-lien1').innerHTML = htmlContent;
+        document.querySelector('.table-body-lien2').innerHTML = htmlContent;
+      }
+    }
+
+    // Chạy hàm khi trang web tải xong
+    window.onload = parseUrlData;
+  </script>
 </body>
 </html>
