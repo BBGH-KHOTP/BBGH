@@ -52,13 +52,16 @@
     
     .scissors {
       position: absolute;
-      top: 0; /* Đưa biểu tượng lên sát mép trên cùng */
+      top: 0;
       left: 50%;
       transform: translateX(-50%);
       background-color: #ffffff;
-      padding: 0 4px 4px 4px;
+      padding: 0 4px;
       font-size: 14pt;
       line-height: 1;
+      display: inline-block;
+      text-align: center;
+      width: auto;
     }
     
     .header-table {
@@ -218,7 +221,7 @@
               <th style="width: 35%;">Tên sản phẩm</th>
               <th style="width: 11%;">ĐV tính</th>
               <th style="width: 10%;">S.lượng</th>
-              <th style="width: 22%;">LSX</th> <!-- Đổi tiêu đề từ Ghi chú thành LSX -->
+              <th style="width: 22%;">LSX</th>
             </tr>
           </thead>
           <tbody class="table-body-lien1">
@@ -252,7 +255,7 @@
       <!-- ĐƯỜNG CẮT GIỮA -->
       <td class="divider-cell">
         <div class="cut-line"></div>
-        <div class="scissors">✂️</div> <!-- Đã được CSS định vị lên chính giữa trên cùng -->
+        <div class="scissors">✂️</div>
       </td>
       
       <!-- LIÊN 2: NỬA BÊN PHẢI -->
@@ -289,7 +292,7 @@
               <th style="width: 35%;">Tên sản phẩm</th>
               <th style="width: 11%;">ĐV tính</th>
               <th style="width: 10%;">S.lượng</th>
-              <th style="width: 22%;">LSX</th> <!-- Đổi tiêu đề từ Ghi chú thành LSX -->
+              <th style="width: 22%;">LSX</th>
             </tr>
           </thead>
           <tbody class="table-body-lien2">
@@ -332,13 +335,11 @@
       const kho = urlParams.get('kho') || '';
       const itemsStr = urlParams.get('items') || '';
 
-      // Điền thông tin chung lên giao diện
       document.querySelectorAll('.lbl-so-bbgh').forEach(el => el.innerText = soBBGH);
       document.querySelectorAll('.lbl-ngay').forEach(el => el.innerText = ngay);
       document.querySelectorAll('.lbl-nguoilap').forEach(el => el.innerText = nguoilap);
       document.querySelectorAll('.lbl-kho').forEach(el => el.innerText = kho);
 
-      // Xử lý chuỗi danh sách vật tư tách bằng dấu '||' và '|' từ AppSheet
       if (itemsStr.trim()) {
         const rows = itemsStr.split('||');
         let htmlContent = '';
@@ -349,9 +350,11 @@
         rows.forEach(row => {
           if (row.trim()) {
             const cols = row.split('|');
-            // Cấu trúc nhận được: LSX(0) | Mục(1) | Mã SP(2) | Tên SP(3) | Đơn vị tính(4) | Số lượng(5) | PO(6) | Nội dung(7)
             if (cols.length >= 6) {
-              const lsxCode = cols[0] ? cols[0].trim() : ''; // Lấy mã hiệu LSX từ vị trí số 0 thay vì PO
+              // Tiến hành xóa bỏ các khoảng trắng và các dấu phẩy thừa ở đầu/cuối của mã LSX
+              let lsxCode = cols[0] ? cols[0].trim() : '';
+              lsxCode = lsxCode.replace(/^[\s,]+|[\s,]+$/g, ''); 
+
               const maSP = cols[2] ? cols[2].trim() : '';
               const tenSP = cols[3] ? cols[3].trim() : '';
               const dvTinh = cols[4] ? cols[4].trim() : '';
@@ -378,10 +381,8 @@
           }
         });
 
-        // Điền lý do nhập kho tự động gộp từ dữ liệu hàng con
         document.querySelectorAll('.lbl-lydo').forEach(el => el.innerText = lyDoGop.join(', '));
 
-        // Hàng tổng số lượng
         const totalRowHtml = `
           <tr class="font-bold">
             <td colspan="4">TỔNG CỘNG</td>
