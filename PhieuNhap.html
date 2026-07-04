@@ -221,7 +221,7 @@
             </tr>
           </thead>
           <tbody class="table-body-lien1">
-            <!-- Dữ liệu JS tự động chèn vào đây -->
+            <!-- Dữ liệu JS tự động điền -->
           </tbody>
         </table>
         
@@ -292,7 +292,7 @@
             </tr>
           </thead>
           <tbody class="table-body-lien2">
-            <!-- Dữ liệu JS tự động chèn vào đây -->
+            <!-- Dữ liệu JS tự động điền -->
           </tbody>
         </table>
         
@@ -321,7 +321,6 @@
     </tr>
   </table>
 
-  <!-- ĐOẠN JAVASCRIPT XỬ LÝ ĐỌC DỮ LIỆU TỪ APPSHEET -->
   <script>
     function parseUrlData() {
       const urlParams = new URLSearchParams(window.location.search);
@@ -332,30 +331,30 @@
       const kho = urlParams.get('kho') || '';
       const itemsStr = urlParams.get('items') || '';
 
-      // Điền dữ liệu chung lên giao diện cho cả 2 Liên
+      // Điền thông tin chung lên giao diện
       document.querySelectorAll('.lbl-so-bbgh').forEach(el => el.innerText = soBBGH);
       document.querySelectorAll('.lbl-ngay').forEach(el => el.innerText = ngay);
       document.querySelectorAll('.lbl-nguoilap').forEach(el => el.innerText = nguoilap);
       document.querySelectorAll('.lbl-kho').forEach(el => el.innerText = kho);
 
-      // Xử lý chuỗi danh sách vật tư tách bằng dấu '||' và các cột tách bằng dấu '|'
+      // Xử lý chuỗi danh sách vật tư tách bằng dấu '||' và '|' từ AppSheet
       if (itemsStr.trim()) {
         const rows = itemsStr.split('||');
         let htmlContent = '';
         let tongSoLuong = 0;
         let stt = 1;
-        let lyDoGop = []; // Mảng chứa các nội dung để làm lý do nhập kho chung
+        let lyDoGop = [];
 
         rows.forEach(row => {
           if (row.trim()) {
             const cols = row.split('|');
-            // Cấu trúc chuỗi nhận được: LSX(0) | Mục(1) | Mã SP(2) | Tên SP(3) | Đơn vị tính(4) | Số lượng(5) | PO(6) | Nội dung(7)
+            // Cấu trúc nhận được: LSX(0) | Mục(1) | Mã SP(2) | Tên SP(3) | Đơn vị tính(4) | Số lượng(5) | PO(6) | Nội dung(7)
             if (cols.length >= 6) {
               const maSP = cols[2] ? cols[2].trim() : '';
               const tenSP = cols[3] ? cols[3].trim() : '';
               const dvTinh = cols[4] ? cols[4].trim() : '';
               const soLuong = parseInt(cols[5]) || 0;
-              const ghiChu = cols[6] ? cols[6].trim() : ''; // Lấy cột PO hoặc QRCode làm ghi chú nếu muốn
+              const poVoucher = cols[6] ? cols[6].trim() : ''; 
               const noiDungRow = cols[7] ? cols[7].trim() : '';
 
               if(noiDungRow && !lyDoGop.includes(noiDungRow)) {
@@ -371,17 +370,17 @@
                   <td class="text-left">${tenSP}</td>
                   <td>${dvTinh}</td>
                   <td>${soLuong.toLocaleString('vi-VN')}</td>
-                  <td>${ghiChu}</td>
+                  <td>${poVoucher}</td>
                 </tr>
               `;
             }
           }
         });
 
-        // Điền lý do nhập kho tổng hợp được từ các hàng chi tiết
+        // Điền lý do nhập kho tự động gộp từ dữ liệu hàng con
         document.querySelectorAll('.lbl-lydo').forEach(el => el.innerText = lyDoGop.join(', '));
 
-        // Thêm hàng Tổng cộng cuối bảng
+        // Hàng tổng số lượng
         const totalRowHtml = `
           <tr class="font-bold">
             <td colspan="4">TỔNG CỘNG</td>
@@ -392,13 +391,11 @@
         
         htmlContent += totalRowHtml;
 
-        // Đổ toàn bộ hàng vào bảng của cả Liên 1 và Liên 2
         document.querySelector('.table-body-lien1').innerHTML = htmlContent;
         document.querySelector('.table-body-lien2').innerHTML = htmlContent;
       }
     }
 
-    // Chạy hàm khi trang web tải xong
     window.onload = parseUrlData;
   </script>
 </body>
