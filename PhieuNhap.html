@@ -52,12 +52,13 @@
     
     .scissors {
       position: absolute;
-      top: 15mm;
+      top: 0; /* Đưa biểu tượng lên sát mép trên cùng */
       left: 50%;
       transform: translateX(-50%);
       background-color: #ffffff;
-      padding: 4px 0;
+      padding: 0 4px 4px 4px;
       font-size: 14pt;
+      line-height: 1;
     }
     
     .header-table {
@@ -217,7 +218,7 @@
               <th style="width: 35%;">Tên sản phẩm</th>
               <th style="width: 11%;">ĐV tính</th>
               <th style="width: 10%;">S.lượng</th>
-              <th style="width: 22%;">Ghi chú</th>
+              <th style="width: 22%;">LSX</th> <!-- Đổi tiêu đề từ Ghi chú thành LSX -->
             </tr>
           </thead>
           <tbody class="table-body-lien1">
@@ -251,7 +252,7 @@
       <!-- ĐƯỜNG CẮT GIỮA -->
       <td class="divider-cell">
         <div class="cut-line"></div>
-        <div class="scissors">✂️</div>
+        <div class="scissors">✂️</div> <!-- Đã được CSS định vị lên chính giữa trên cùng -->
       </td>
       
       <!-- LIÊN 2: NỬA BÊN PHẢI -->
@@ -288,7 +289,7 @@
               <th style="width: 35%;">Tên sản phẩm</th>
               <th style="width: 11%;">ĐV tính</th>
               <th style="width: 10%;">S.lượng</th>
-              <th style="width: 22%;">Ghi chú</th>
+              <th style="width: 22%;">LSX</th> <!-- Đổi tiêu đề từ Ghi chú thành LSX -->
             </tr>
           </thead>
           <tbody class="table-body-lien2">
@@ -350,11 +351,11 @@
             const cols = row.split('|');
             // Cấu trúc nhận được: LSX(0) | Mục(1) | Mã SP(2) | Tên SP(3) | Đơn vị tính(4) | Số lượng(5) | PO(6) | Nội dung(7)
             if (cols.length >= 6) {
+              const lsxCode = cols[0] ? cols[0].trim() : ''; // Lấy mã hiệu LSX từ vị trí số 0 thay vì PO
               const maSP = cols[2] ? cols[2].trim() : '';
               const tenSP = cols[3] ? cols[3].trim() : '';
               const dvTinh = cols[4] ? cols[4].trim() : '';
               const soLuong = parseInt(cols[5]) || 0;
-              const poVoucher = cols[6] ? cols[6].trim() : ''; 
               const noiDungRow = cols[7] ? cols[7].trim() : '';
 
               if(noiDungRow && !lyDoGop.includes(noiDungRow)) {
@@ -370,7 +371,7 @@
                   <td class="text-left">${tenSP}</td>
                   <td>${dvTinh}</td>
                   <td>${soLuong.toLocaleString('vi-VN')}</td>
-                  <td>${poVoucher}</td>
+                  <td>${lsxCode}</td>
                 </tr>
               `;
             }
