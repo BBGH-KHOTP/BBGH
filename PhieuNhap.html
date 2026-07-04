@@ -38,30 +38,30 @@
     
     .divider-cell {
       width: 6%;
-      position: relative;
       vertical-align: top;
       text-align: center;
     }
     
+    /* Đường nét đứt làm điểm neo chính */
     .cut-line {
       border-left: 1.5px dashed #444444;
       height: 180mm;
       margin: 0 auto;
-      position: relative;
+      position: relative; /* Tạo điểm neo cố định cho icon kéo */
+      width: 0; /* Ép chiều rộng về 0 để trục tọa độ nằm ngay đường line */
     }
     
+    /* Định vị icon cái kéo chuẩn xác tuyệt đối */
     .scissors {
       position: absolute;
       top: 0;
       left: 50%;
-      transform: translateX(-50%);
+      transform: translateX(-50%); /* Căn giữa hoàn hảo dựa trên chiều rộng icon */
       background-color: #ffffff;
       padding: 0 4px;
       font-size: 14pt;
       line-height: 1;
-      display: inline-block;
-      text-align: center;
-      width: auto;
+      white-space: nowrap;
     }
     
     .header-table {
@@ -252,10 +252,11 @@
         </table>
       </td>
       
-      <!-- ĐƯỜNG CẮT GIỮA -->
+      <!-- ĐƯỜNG CẮT GIỮA: ĐƯA ICON KÉO VÀO TRONG ĐƯỜNG NÉT ĐỨT -->
       <td class="divider-cell">
-        <div class="cut-line"></div>
-        <div class="scissors">✂️</div>
+        <div class="cut-line">
+          <div class="scissors">✂️</div>
+        </div>
       </td>
       
       <!-- LIÊN 2: NỬA BÊN PHẢI -->
@@ -327,74 +328,80 @@
 
   <script>
     function parseUrlData() {
-      const urlParams = new URLSearchParams(window.location.search);
-      
-      const soBBGH = urlParams.get('so') || '';
-      const ngay = urlParams.get('ngay') || '';
-      const nguoilap = urlParams.get('nguoilap') || '';
-      const kho = urlParams.get('kho') || '';
-      const itemsStr = urlParams.get('items') || '';
-
-      document.querySelectorAll('.lbl-so-bbgh').forEach(el => el.innerText = soBBGH);
-      document.querySelectorAll('.lbl-ngay').forEach(el => el.innerText = ngay);
-      document.querySelectorAll('.lbl-nguoilap').forEach(el => el.innerText = nguoilap);
-      document.querySelectorAll('.lbl-kho').forEach(el => el.innerText = kho);
-
-      if (itemsStr.trim()) {
-        const rows = itemsStr.split('||');
-        let htmlContent = '';
-        let tongSoLuong = 0;
-        let stt = 1;
-        let lyDoGop = [];
-
-        rows.forEach(row => {
-          if (row.trim()) {
-            const cols = row.split('|');
-            if (cols.length >= 6) {
-              // Tiến hành xóa bỏ các khoảng trắng và các dấu phẩy thừa ở đầu/cuối của mã LSX
-              let lsxCode = cols[0] ? cols[0].trim() : '';
-              lsxCode = lsxCode.replace(/^[\s,]+|[\s,]+$/g, ''); 
-
-              const maSP = cols[2] ? cols[2].trim() : '';
-              const tenSP = cols[3] ? cols[3].trim() : '';
-              const dvTinh = cols[4] ? cols[4].trim() : '';
-              const soLuong = parseInt(cols[5]) || 0;
-              const noiDungRow = cols[7] ? cols[7].trim() : '';
-
-              if(noiDungRow && !lyDoGop.includes(noiDungRow)) {
-                lyDoGop.push(noiDungRow);
-              }
-
-              tongSoLuong += soLuong;
-
-              htmlContent += `
-                <tr>
-                  <td>${stt++}</td>
-                  <td>${maSP}</td>
-                  <td class="text-left">${tenSP}</td>
-                  <td>${dvTinh}</td>
-                  <td>${soLuong.toLocaleString('vi-VN')}</td>
-                  <td>${lsxCode}</td>
-                </tr>
-              `;
-            }
-          }
-        });
-
-        document.querySelectorAll('.lbl-lydo').forEach(el => el.innerText = lyDoGop.join(', '));
-
-        const totalRowHtml = `
-          <tr class="font-bold">
-            <td colspan="4">TỔNG CỘNG</td>
-            <td>${tongSoLuong.toLocaleString('vi-VN')}</td>
-            <td></td>
-          </tr>
-        `;
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
         
-        htmlContent += totalRowHtml;
+        const soBBGH = urlParams.get('so') || '';
+        const ngay = urlParams.get('ngay') || '';
+        const nguoilap = urlParams.get('nguoilap') || '';
+        const kho = urlParams.get('kho') || '';
+        const itemsStr = urlParams.get('items') || '';
 
-        document.querySelector('.table-body-lien1').innerHTML = htmlContent;
-        document.querySelector('.table-body-lien2').innerHTML = htmlContent;
+        document.querySelectorAll('.lbl-so-bbgh').forEach(el => el.innerText = soBBGH);
+        document.querySelectorAll('.lbl-ngay').forEach(el => el.innerText = ngay);
+        document.querySelectorAll('.lbl-nguoilap').forEach(el => el.innerText = nguoilap);
+        document.querySelectorAll('.lbl-kho').forEach(el => el.innerText = kho);
+
+        if (itemsStr.trim()) {
+          const rows = itemsStr.split('||');
+          let htmlContent = '';
+          let tongSoLuong = 0;
+          let stt = 1;
+          let lyDoGop = [];
+
+          rows.forEach(row => {
+            if (row.trim()) {
+              const cols = row.split('|');
+              if (cols.length >= 6) {
+                let lsxCode = cols[0] ? String(cols[0]).trim() : '';
+                
+                if (lsxCode) {
+                  lsxCode = lsxCode.replace(/^[\s,]+|[\s,]+$/g, '');
+                }
+
+                const maSP = cols[2] ? cols[2].trim() : '';
+                const tenSP = cols[3] ? cols[3].trim() : '';
+                const dvTinh = cols[4] ? cols[4].trim() : '';
+                const soLuong = parseInt(cols[5]) || 0;
+                const noiDungRow = cols[7] ? cols[7].trim() : '';
+
+                if (noiDungRow && !lyDoGop.includes(noiDungRow)) {
+                  lyDoGop.push(noiDungRow);
+                }
+
+                tongSoLuong += soLuong;
+
+                htmlContent += `
+                  <tr>
+                    <td>${stt++}</td>
+                    <td>${maSP}</td>
+                    <td class="text-left">${tenSP}</td>
+                    <td>${dvTinh}</td>
+                    <td>${soLuong.toLocaleString('vi-VN')}</td>
+                    <td>${lsxCode}</td>
+                  </tr>
+                `;
+              }
+            }
+          });
+
+          document.querySelectorAll('.lbl-lydo').forEach(el => el.innerText = lyDoGop.join(', '));
+
+          const totalRowHtml = `
+            <tr class="font-bold">
+              <td colspan="4">TỔNG CỘNG</td>
+              <td>${tongSoLuong.toLocaleString('vi-VN')}</td>
+              <td></td>
+            </tr>
+          `;
+          
+          htmlContent += totalRowHtml;
+
+          document.querySelector('.table-body-lien1').innerHTML = htmlContent;
+          document.querySelector('.table-body-lien2').innerHTML = htmlContent;
+        }
+      } catch (error) {
+        console.error("Lỗi xử lý dữ liệu trang in:", error);
       }
     }
 
