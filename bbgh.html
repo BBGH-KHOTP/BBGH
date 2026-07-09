@@ -1,1085 +1,581 @@
 <!DOCTYPE html>
-
 <html lang="vi">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Biên Bản Giao Nhận Hàng</title>
+<!-- Nhúng thư viện html2pdf.js phục vụ xuất file PDF chất lượng cao -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
-
   @page {
-
     size: A4;
-
     margin: 20mm 15mm 20mm 30mm;
-
   }
-
-
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-
-
   body {
-
     font-family: 'Times New Roman', Times, serif;
-
     font-size: 10pt;
-
     color: #000;
-
     background: #fff;
-
     padding: 20mm 15mm 20mm 30mm;
-
   }
-
-
 
   /* ── HEADER ── */
-
   .header-wrap {
-
     display: flex;
-
     align-items: center;
-
     border: 1.5px solid #000;
-
     margin-bottom: 4mm;
-
   }
-
-
 
   .logo-cell {
-
     width: 28mm;
-
     min-width: 28mm;
-
     border-right: 1.5px solid #000;
-
     display: flex;
-
     flex-direction: column;
-
     align-items: center;
-
     justify-content: center;
-
     padding: 3mm;
-
     gap: 1mm;
-
   }
-
-
 
   .logo-img {
-
     width: 100%;
-
     max-width: 24mm;
-
     height: auto;
-
     display: block;
-
   }
-
-
 
   .company-cell {
-
     flex: 1;
-
     padding: 3mm 4mm;
-
   }
-
-
 
   .company-name {
-
     font-size: 10.5pt;
-
     font-weight: bold;
-
     margin-bottom: 1mm;
-
   }
-
-
 
   .company-info {
-
     font-size: 8.5pt;
-
     line-height: 1.5;
-
   }
-
-
 
   .doc-ref {
-
     font-size: 7.5pt;
-
     text-align: right;
-
     margin-bottom: 1mm;
-
     color: #333;
-
   }
-
-
 
   /* ── TITLE CONTAINER ── */
-
   .title-container {
-
     display: flex;
-
     flex-direction: column;
-
     width: 100%;
-
     margin-top: 2mm;
-
     margin-bottom: 3mm;
-
   }
-
-
 
   .doc-title {
-
     text-align: center;
-
     width: 100%;
-
   }
-
-
 
   .doc-title h1 {
-
     font-size: 15pt;
-
     font-weight: bold;
-
     text-transform: uppercase;
-
     letter-spacing: 1px;
-
     margin: 0;
-
   }
-
-
 
   .doc-date-place {
-
     text-align: right;
-
     width: 100%;
-
     font-style: italic;
-
     font-size: 9.5pt;
-
     margin-top: 1.5mm;
-
     margin-bottom: 1.5mm;
-
   }
-
-
 
   .doc-so {
-
     text-align: center;
-
     width: 100%;
-
     font-size: 10pt;
-
     font-weight: bold;
-
   }
-
-
 
   /* ── PARTIES ── */
-
   .parties {
-
     margin-bottom: 2mm;
-
     font-size: 9.5pt;
-
     line-height: 1.7;
-
   }
-
-
 
   .party-title {
-
     font-weight: bold;
-
     font-size: 9.5pt;
-
   }
-
-
 
   .party-row {
-
     display: flex;
-
     gap: 4mm;
-
   }
-
-
 
   .party-row span:first-child {
-
     min-width: 18mm;
-
     font-weight: bold;
-
   }
-
-
 
   .inline-fields {
-
     display: flex;
-
     gap: 8mm;
-
   }
-
-
 
   .field-label { font-weight: bold; }
 
-
-
   .field-value {
-
     border-bottom: 1px solid #000;
-
     min-width: 45mm;
-
     display: inline-block;
-
   }
-
-
 
   /* ── INTRO TEXT ── */
-
   .intro {
-
     margin: 2mm 0;
-
     font-size: 9.5pt;
-
   }
-
-
 
   /* ── TABLE TỐI ƯU THEO TỶ LỆ MỚI ── */
-
   table {
-
     width: 100%;
-
     border-collapse: collapse;
-
     font-size: 9pt;
-
     margin: 2mm 0;
-
     table-layout: fixed; 
-
   }
-
-
 
   th, td {
-
     border: 1px solid #000;
-
     padding: 2mm 1mm; 
-
     vertical-align: middle;
-
     word-break: break-word; 
-
   }
-
-
 
   thead th {
-
     background: #f0f0f0;
-
     text-align: center;
-
     font-weight: bold;
-
     font-size: 9pt;
-
     line-height: 1.3;
-
   }
-
-
 
   /* Điều chỉnh tỷ lệ các cột */
-
   td.stt, th:nth-child(1) { width: 5%; text-align: center; }
-
   td.masp, th:nth-child(4) { width: 11%; text-align: center; }
-
   td.dvt, th:nth-child(6) { width: 6%; text-align: center; }
-
   
-
   td.sl, th:nth-child(7) { 
-
     width: 7%; 
-
     text-align: center; 
-
     font-weight: bold; 
-
     white-space: normal; 
-
   }
-
-
 
   td.lsx, th:nth-child(2) { width: 16%; text-align: center; }
-
   td.po,  th:nth-child(3) { width: 16%; text-align: center; }
 
-
-
   td.ten { 
-
     text-align: left;   
-
     width: 22%; 
-
   }
-
   
-
   td.ghichu { 
-
     text-align: left;   
-
     width: 17%; 
-
   }
-
-
 
   .row-total td {
-
     font-weight: bold;
-
     text-align: center;
-
     background: #f9f9f9;
-
   }
-
-
 
   /* ── FOOTER NOTES ── */
-
   .footer-note {
-
     font-size: 8.5pt;
-
     font-style: italic;
-
     margin: 2mm 0 1mm;
-
   }
-
-
 
   .footer-note-bold {
-
     font-size: 8.5pt;
-
     font-weight: bold;
-
     margin-bottom: 3mm;
-
   }
-
-
 
   /* ── SIGNATURES ── */
-
   .sig-section {
-
     display: flex;
-
     justify-content: space-between;
-
     margin-top: 3mm;
-
     font-size: 8.5pt;
-
     text-align: center;
-
     gap: 2mm;
-
   }
-
-
 
   .sig-box {
-
     flex: 1;
-
     display: flex;
-
     flex-direction: column;
-
     align-items: center;
-
     gap: 1mm;
-
   }
-
-
 
   .sig-title {
-
     font-weight: bold;
-
     font-size: 8.5pt;
-
     text-transform: uppercase;
-
     line-height: 1.3;
-
   }
-
-
 
   .sig-sub {
-
     font-size: 7.5pt;
-
     font-style: italic;
-
     color: #333;
-
   }
-
-
 
   .sig-space { height: 16mm; }
 
-
-
   .sig-name {
-
     font-size: 8.5pt;
-
     font-weight: bold;
-
   }
-
-
 
   /* ── PRINT ── */
-
   @media print {
-
     body { padding: 0; }
-
     .no-print { display: none !important; }
-
   }
-
-
 
   /* ── SCREEN HELPERS ── */
-
   @media screen {
-
     body { max-width: 210mm; margin: 0 auto; box-shadow: 0 0 12px rgba(0,0,0,.15); }
-
+    
     .btn-print {
-
       position: fixed; top: 10px; right: 10px;
-
       background: #1a5276; color: #fff;
-
       border: none; padding: 8px 18px;
-
       border-radius: 4px; font-size: 12pt; cursor: pointer;
-
       z-index: 999; box-shadow: 0 2px 6px rgba(0,0,0,.3);
-
     }
-
     .btn-print:hover { background: #154360; }
 
+    /* CSS Nút tải file PDF theo yêu cầu */
+    .btn-pdf {
+      position: fixed; top: 55px; right: 10px;
+      background: transparent;
+      border: none; cursor: pointer;
+      z-index: 999;
+      transition: transform 0.2s ease;
+    }
+    .btn-pdf:hover { transform: scale(1.05); }
+    .btn-pdf img {
+      width: 58px; /* Tùy chỉnh kích thước nút giống hình mẫu */
+      height: auto;
+      display: block;
+    }
   }
-
 </style>
-
 </head>
-
 <body>
 
-
-
+<!-- Nhóm các nút thao tác trên màn hình máy tính -->
 <button class="btn-print no-print" onclick="window.print()">🖨️ In</button>
-
-
+<button class="btn-pdf no-print" onclick="downloadPDF()" title="Tải file PDF">
+  <img src="https://cdn-icons-png.flaticon.com/128/136/136522.png" alt="Download PDF">
+</button>
 
 <div class="doc-ref">QT.TOMC.TKVT/06-BM01</div>
 
-
-
 <div class="header-wrap">
-
   <div class="logo-cell">
-
     <img class="logo-img" src="https://thacoindustries.com/wp-content/uploads/2023/08/LOGO_24-7-2023-01.png" alt="THACO Industries">
-
   </div>
-
   <div class="company-cell">
-
     <div class="company-name">CÔNG TY TNHH TỔ HỢP CƠ KHÍ THACO</div>
-
     <div class="company-info">
-
       Địa Chỉ: KCN Cơ khí Ô tô Chu Lai Trường Hải - Xã Núi Thành - Thành Phố Đà Nẵng<br>
-
       Điện Thoại: <span id="hdr-phone">0253.565.327</span>&nbsp;&nbsp;&nbsp;MST: <span id="hdr-mst">4001264725</span>
-
     </div>
-
   </div>
-
 </div>
-
-
 
 <div class="title-container">
-
   <div class="doc-title">
-
     <h1>Biên Bản Giao Nhận Hàng</h1>
-
   </div>
-
   <div class="doc-date-place" id="el-dateplace">Chu Lai, ngày <span id="el-day"></span></div>
-
   <div class="doc-so">SỐ: <span id="el-sohd"></span></div>
-
 </div>
-
-
 
 <div class="parties">
-
   <div><span class="party-title">A. BÊN GIAO: </span><span id="el-bengiao" style="font-weight:bold;">CÔNG TY TNHH TỔ HỢP CƠ KHÍ THACO</span></div>
-
   <div class="party-row"><span>Địa chỉ:</span><span id="el-diachi-giao">KCN Cơ khí Ô tô Chu Lai Trường Hải - Xã Núi Thành - Thành Phố Đà Nẵng</span></div>
-
   <div class="inline-fields">
-
     <div><span class="field-label">Đại diện: </span><span class="field-value" id="el-daidien-giao">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-
     <div><span class="field-label">Điện thoại: </span><span class="field-value" id="el-dt-giao">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-
   </div>
-
-
 
   <div style="margin-top:1.5mm"><span class="party-title">B. BÊN NHẬN: </span><span id="el-bennhan" style="font-weight:bold;"></span></div>
-
   <div class="party-row"><span>Địa chỉ:</span><span id="el-diachi-nhan">KCN Cơ khí Ô tô Chu Lai Trường Hải - Xã Núi Thành - Thành Phố Đà Nẵng</span></div>
-
   <div class="inline-fields">
-
     <div><span class="field-label">Đại diện: </span><span class="field-value" id="el-daidien-nhan">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-
     <div><span class="field-label">Điện thoại: </span><span class="field-value" id="el-dt-nhan">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-
   </div>
-
-
 
   <div style="margin-top:1.5mm"><span class="party-title">C. BÊN VẬN CHUYỂN:</span></div>
-
   <div class="inline-fields">
-
     <div><span class="field-label">Tên tài xế: </span><span class="field-value" id="el-taixe">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-
     <div><span class="field-label">Điện thoại: </span><span class="field-value" id="el-dt-taixe">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-
   </div>
-
   <div><span class="field-label">BSX: </span><span class="field-value" id="el-bsx" style="min-width:30mm;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-
 </div>
-
-
 
 <div class="intro">Các bên tiến hành giao nhận hàng hóa với nội dung sau:</div>
 
-
-
 <table>
-
   <thead>
-
     <tr>
-
       <th>MỤC</th>
-
       <th>LSX-ĐH</th>
-
       <th>SỐ PO</th>
-
       <th>MÃ SP</th>
-
       <th>TÊN CHI TIẾT</th>
-
       <th>ĐVT</th>
-
       <th>SL</th>
-
       <th>GHI CHÚ</th>
-
     </tr>
-
   </thead>
-
   <tbody id="table-body">
-
   </tbody>
-
   <tfoot>
-
     <tr class="row-total">
-
       <td colspan="6">Tổng cộng</td>
-
       <td id="tong-sl"></td>
-
       <td></td>
-
     </tr>
-
   </tfoot>
-
 </table>
 
-
-
 <div class="footer-note">Hàng khô ráo, đúng quy cách</div>
-
 <div class="footer-note-bold">Ghi chú: - Biên bản này được lập 03 bản, có giá trị pháp lý như nhau, mỗi bên giữ 01 bản</div>
 
-
-
 <div class="sig-section">
-
   <div class="sig-box">
-
     <div class="sig-title">Bên Giao</div>
-
     <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
-
     <div class="sig-space"></div>
-
     <div class="sig-name" id="sig-giao"></div>
-
   </div>
-
   <div class="sig-box">
-
     <div class="sig-title">P. Chất<br>Lượng</div>
-
     <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
-
     <div class="sig-space"></div>
-
   </div>
-
   <div class="sig-box">
-
     <div class="sig-title">PT. Bộ Phận</div>
-
     <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
-
     <div class="sig-space"></div>
-
   </div>
-
   <div class="sig-box">
-
     <div class="sig-title">Bảo Vệ</div>
-
     <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
-
     <div class="sig-space"></div>
-
   </div>
-
   <div class="sig-box">
-
     <div class="sig-title">Bên Vận<br>Chuyển</div>
-
     <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
-
     <div class="sig-space"></div>
-
   </div>
-
   <div class="sig-box">
-
     <div class="sig-title">Bên Nhận</div>
-
     <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
-
     <div class="sig-space"></div>
-
   </div>
-
   <div class="sig-box">
-
     <div class="sig-title">Người Lập</div>
-
     <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
-
     <div class="sig-space"></div>
-
     <div class="sig-name" id="sig-nguoilap"></div>
-
   </div>
-
 </div>
 
-
-
 <script>
-
 // ── ĐỌC QUERY STRING ──────────────────────────────────────────────
-
 function q(name) {
-
   const url = new URLSearchParams(window.location.search);
-
   return url.get(name) || '';
-
 }
-
-
 
 // ── HIỂN THỊ TEXT VÀO ELEMENT ──
-
 function set(id, val) {
-
   const el = document.getElementById(id);
-
   if (el && val) el.textContent = val;
-
 }
-
-
 
 // ── NGÀY THÁNG ──
-
 function formatDate(raw) {
-
   if (!raw) return '';
-
   let d;
-
   if (/^\d{2}\/\d{2}\/\d{4}/.test(raw)) {
-
     const [dd, mm, yyyy] = raw.split('/');
-
     d = new Date(yyyy, mm - 1, dd);
-
   } else {
-
     d = new Date(raw);
-
   }
-
   if (isNaN(d)) return raw;
-
   const dd = String(d.getDate()).padStart(2,'0');
-
   const mm = String(d.getMonth()+1).padStart(2,'0');
-
   const yyyy = d.getFullYear();
-
   return `${dd}/${mm}/${yyyy}`;
-
 }
 
-
-
 // ── ĐIỀN DỮ LIỆU HEADER ──
-
 const soHD    = q('so')      || q('sohd')   || '_______________';
-
 const ngay    = q('ngay')    || q('date')    || '';
-
 const benNhan = q('bennhan') || q('khach')   || '_______________';
-
 const nguoiLap= q('nguoilap')|| '';
-
 const taixe   = q('taixe')   || '';
-
 const bsx     = q('bsx')     || '';
-
 const dtNhan  = q('dtnhan')  || '';
-
 const dtTaixe = q('dttaixe') || '';
 
-
-
 set('el-sohd',   soHD);
-
 set('el-bennhan', benNhan);
-
 set('sig-nguoilap', nguoiLap);
-
 if (taixe)   set('el-taixe',   taixe);
-
 if (bsx)     set('el-bsx',     bsx);
-
 if (dtNhan)  set('el-dt-nhan', dtNhan);
-
 if (dtTaixe) set('el-dt-taixe', dtTaixe);
 
-
-
 const ngayFmt = formatDate(ngay);
-
 if (ngayFmt) set('el-day', ngayFmt);
-
 else document.getElementById('el-day').textContent = '___/___/______';
 
-
-
 // ── ĐIỀN BẢNG HÀNG HÓA ──
-
 const rawItems = q('items');
-
 const tbody = document.getElementById('table-body');
-
-
 
 let tongSL = 0;
 
-
-
 if (rawItems) {
-
   const rows = rawItems.replace(/,(\s*\|\|)/g, '$1').split('||');
 
-
-
   rows.forEach((row) => {
-
     let cleanRow = row.trim();
-
     if (!cleanRow || cleanRow === ',') return;
-
     if (cleanRow.startsWith(',')) cleanRow = cleanRow.substring(1);
 
-
-
     const cols = cleanRow.split('|');
-
-    if (cols.length < 7) return; // Đổi từ < 6 thành < 7 để khớp cấu trúc mới có [Mục]
-
-
-
-    // Cấu trúc chuỗi từ AppSheet: LSX | Mục | Mã SP | Tên SP | ĐVT | Số lượng | PO | Nội dung
+    if (cols.length < 7) return; 
 
     const [lsx='', muc='', masp='', ten='', dvt='', sl='', po='', ghichu=''] = cols;
-
     const slVal = parseFloat(sl) || 0;
-
     tongSL += slVal;
 
-
-
     const tr = document.createElement('tr');
-
     tr.innerHTML = `
-
       <td class="stt">${muc}</td>
-
       <td class="lsx">${lsx}</td>
-
       <td class="po">${po}</td>
-
       <td class="masp">${masp}</td>
-
       <td class="ten">${ten}</td>
-
       <td class="dvt">${dvt}</td>
-
       <td class="sl">${sl}</td>
-
       <td class="ghichu">${ghichu}</td>
-
     `;
-
     tbody.appendChild(tr);
-
   });
-
 } else {
-
-  // Dữ liệu demo tĩnh chuẩn hóa 8 trường khi chạy trực tiếp không qua URL
-
   const demo = [
-
     ['TBNN.15/06', '1', 'CKM7-4', 'Bulong 12x50 ren 40 mạ đen', 'CT', 100, 'BBGH02072026-AD2-001', 'Kết cấu kệ kho mát 2 - XĐG chuối LP3, LP1, BP2'],
-
     ['TBNN.15/06', '2', 'CKM7-4', 'Bulong 12x50 ren 40 mạ đen', 'CT', 1, 'BBGH02072026-AD2-001', 'Kết cấu kệ kho mát 2 - XĐG chuối LP3, LP1, BP2'],
-
   ];
-
   demo.forEach((d) => {
-
     tongSL += d[5];
-
     const tr = document.createElement('tr');
-
     tr.innerHTML = `
-
       <td class="stt">${d[1]}</td>
-
       <td class="lsx">${d[0]}</td>
-
       <td class="po">${d[6]}</td>
-
       <td class="masp">${d[2]}</td>
-
       <td class="ten">${d[3]}</td>
-
       <td class="dvt">${d[4]}</td>
-
       <td class="sl">${d[5]}</td>
-
       <td class="ghichu">${d[7]}</td>
-
     `;
-
     tbody.appendChild(tr);
-
   });
-
 }
-
-
 
 document.getElementById('tong-sl').textContent = tongSL || '';
 
-
-
-// ── TỰ ĐỘNG GỘP Ô (LSX-ĐH, SỐ PO VÀ GHI CHÚ) TRÙNG NHAU ──
-
 autoMergeTableCells();
 
-
-
 function autoMergeTableCells() {
-
   const tableRows = tbody.getElementsByTagName('tr');
-
   if (tableRows.length <= 1) return;
-
-
-
-  // Cột chỉ định gộp: index 1 (LSX), index 2 (Số PO), index 7 (Ghi chú)
 
   const targetCols = [1, 2, 7];
 
-
-
   targetCols.forEach((colIdx) => {
-
     let anchorCell = null;
-
     let spanCount = 1;
 
-
-
     for (let i = 0; i < tableRows.length; i++) {
-
       const currentCell = tableRows[i].cells[colIdx];
-
       if (!currentCell) continue;
 
-
-
       if (anchorCell === null) {
-
         anchorCell = currentCell;
-
         spanCount = 1;
-
       } else if (currentCell.textContent.trim() === anchorCell.textContent.trim() && anchorCell.textContent.trim() !== '') {
-
         spanCount++;
-
         anchorCell.rowSpan = spanCount;
-
         currentCell.style.display = 'none';
-
       } else {
-
         anchorCell = currentCell;
-
         spanCount = 1;
-
       }
-
     }
-
   });
-
 }
 
+// ── CHỨC NĂNG TỰ ĐỘNG XUẤT/TẢI FILE PDF ──
+function downloadPDF() {
+  // Loại bỏ các ký tự đặc biệt không hợp lệ cho tên file
+  const safeSoHD = soHD.replace(/[\\\/:*?"<>|]/g, '_');
+  const filename = `Bien_Ban_Giao_Nhan_Hang_${safeSoHD}.pdf`;
+
+  // Thiết lập cấu hình xuất PDF chuẩn A4, căn lề như file CSS gốc
+  const opt = {
+    margin:       [20, 15, 20, 30], // Top, Left, Bottom, Right khớp CSS @page
+    filename:     filename,
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2, useCORS: true, logging: false },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  // Tiến hành tạo và tải file PDF về máy
+  html2pdf().set(opt).from(document.body).save();
+}
 </script>
-
 </body>
-
 </html>
