@@ -4,13 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Biên Bản Giao Nhận Hàng</title>
-<!-- Tích hợp thư viện html2pdf.js để xuất file PDF giữ nguyên tỷ lệ -->
+<!-- Tích hợp thư viện html2pdf.js để xuất file PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
+  /* Cấu hình trang in chuẩn A4 */
   @page {
     size: A4;
-    margin: 20mm 15mm 20mm 30mm;
+    margin: 0; /* Để html2pdf tự kiểm soát margin qua tùy chọn javascript nhằm tránh lỗi nhân đôi lề */
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -20,38 +21,45 @@
     font-size: 10pt;
     color: #000;
     background: #fff;
-    padding: 20mm 15mm 20mm 30mm;
+  }
+
+  /* Khung chứa toàn bộ nội dung tài liệu chuẩn kích thước A4 phục vụ in và xuất PDF tỷ lệ 1:1 */
+  .document-container {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    padding: 20mm 15mm 20mm 30mm; /* Đặt lề cố định ở đây */
+    position: relative;
+    background: #fff;
   }
 
   /* ── HEADER ── */
   .header-wrap {
-    display: flex;
-    align-items: center;
+    display: table;
+    width: 100%;
     border: 1.5px solid #000;
     margin-bottom: 4mm;
   }
 
   .logo-cell {
+    display: table-cell;
     width: 28mm;
-    min-width: 28mm;
     border-right: 1.5px solid #000;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    vertical-align: middle;
+    text-align: center;
     padding: 3mm;
-    gap: 1mm;
   }
 
   .logo-img {
     width: 100%;
     max-width: 24mm;
     height: auto;
-    display: block;
+    display: inline-block;
   }
 
   .company-cell {
-    flex: 1;
+    display: table-cell;
+    vertical-align: middle;
     padding: 3mm 4mm;
   }
 
@@ -75,8 +83,6 @@
 
   /* ── TITLE CONTAINER ── */
   .title-container {
-    display: flex;
-    flex-direction: column;
     width: 100%;
     margin-top: 2mm;
     margin-bottom: 3mm;
@@ -124,18 +130,24 @@
   }
 
   .party-row {
-    display: flex;
-    gap: 4mm;
+    width: 100%;
+    margin-bottom: 0.5mm;
   }
 
   .party-row span:first-child {
-    min-width: 18mm;
+    display: inline-block;
+    width: 18mm;
     font-weight: bold;
   }
 
   .inline-fields {
-    display: flex;
-    gap: 8mm;
+    width: 100%;
+    margin-bottom: 0.5mm;
+  }
+
+  .inline-fields > div {
+    display: inline-block;
+    margin-right: 8mm;
   }
 
   .field-label { font-weight: bold; }
@@ -176,30 +188,15 @@
     line-height: 1.3;
   }
 
-  /* Điều chỉnh tỷ lệ các cột */
-  td.stt, th:nth-child(1) { width: 5%; text-align: center; }
-  td.masp, th:nth-child(4) { width: 11%; text-align: center; }
-  td.dvt, th:nth-child(6) { width: 6%; text-align: center; }
-  
-  td.sl, th:nth-child(7) { 
-    width: 7%; 
-    text-align: center; 
-    font-weight: bold; 
-    white-space: normal; 
-  }
-
-  td.lsx, th:nth-child(2) { width: 16%; text-align: center; }
-  td.po,  th:nth-child(3) { width: 16%; text-align: center; }
-
-  td.ten { 
-    text-align: left;   
-    width: 22%; 
-  }
-  
-  td.ghichu { 
-    text-align: left;   
-    width: 17%; 
-  }
+  /* Định dạng độ rộng cột cố định bằng % đúng chuẩn giao diện ảnh 1 */
+  th:nth-child(1), td.stt { width: 5%; text-align: center; }
+  th:nth-child(2), td.lsx { width: 16%; text-align: center; }
+  th:nth-child(3), td.po  { width: 16%; text-align: center; }
+  th:nth-child(4), td.masp { width: 11%; text-align: center; }
+  th:nth-child(5), td.ten { width: 22%; text-align: left; }
+  th:nth-child(6), td.dvt { width: 6%; text-align: center; }
+  th:nth-child(7), td.sl  { width: 7%; text-align: center; font-weight: bold; }
+  th:nth-child(8), td.ghichu { width: 17%; text-align: left; }
 
   .row-total td {
     font-weight: bold;
@@ -222,20 +219,18 @@
 
   /* ── SIGNATURES ── */
   .sig-section {
-    display: flex;
-    justify-content: space-between;
+    display: table;
+    width: 100%;
     margin-top: 3mm;
     font-size: 8.5pt;
     text-align: center;
-    gap: 2mm;
   }
 
   .sig-box {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1mm;
+    display: table-cell;
+    width: 14.28%; /* Chia đều 7 cột chữ ký */
+    vertical-align: top;
+    padding: 0 1mm;
   }
 
   .sig-title {
@@ -243,12 +238,14 @@
     font-size: 8.5pt;
     text-transform: uppercase;
     line-height: 1.3;
+    min-height: 24pt; /* Đảm bảo chiều cao đồng đều kể cả khi xuống dòng */
   }
 
   .sig-sub {
     font-size: 7.5pt;
     font-style: italic;
     color: #333;
+    margin-top: 2px;
   }
 
   .sig-space { height: 16mm; }
@@ -260,39 +257,49 @@
 
   /* ── PRINT ── */
   @media print {
-    body { padding: 0; }
+    body { background: none; }
+    .document-container {
+      margin: 0;
+      box-shadow: none;
+      padding: 20mm 15mm 20mm 30mm !important;
+    }
     .no-print { display: none !important; }
   }
 
   /* ── SCREEN HELPERS ── */
   @media screen {
-    body { max-width: 210mm; margin: 0 auto; box-shadow: 0 0 12px rgba(0,0,0,.15); }
+    body { background: #e0e0e0; padding: 20px 0; }
+    .document-container {
+      box-shadow: 0 0 12px rgba(0,0,0,.25);
+    }
     
     /* Container chứa các nút điều khiển cố định góc phải */
     .action-controls {
       position: fixed;
-      top: 10px;
-      right: 10px;
+      top: 20px;
+      right: 20px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      z-index: 999;
+      gap: 10px;
+      z-index: 9999;
     }
     
     .btn-action {
       background: #1a5276;
       color: #fff;
       border: none;
-      padding: 8px 18px;
+      padding: 10px 20px;
       border-radius: 4px;
       font-size: 11pt;
+      font-weight: bold;
       cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,.3);
-      width: 120px; /* Đảm bảo 2 nút bằng nhau */
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
+      width: 130px; /* Đảm bảo cân đối bằng nhau */
       text-align: center;
+      transition: all 0.2s;
     }
     
-    .btn-action:hover { background: #154360; }
+    .btn-action:hover { background: #154360; transform: translateY(-1px); }
     .btn-pdf { background: #27ae60; }
     .btn-pdf:hover { background: #1e8449; }
   }
@@ -302,123 +309,128 @@
 
 <!-- Cụm nút chức năng cân đối bên góc phải -->
 <div class="action-controls no-print">
-  <button class="btn-action btn-print" onclick="window.print()">🖨️ In A4</button>
+  <button class="btn-action btn-print" onclick="window.print()">🖨️ In</button>
   <button class="btn-action btn-pdf" onclick="exportToPDF()">📄 Xuất PDF</button>
 </div>
 
-<div class="doc-ref">QT.TOMC.TKVT/06-BM01</div>
+<!-- Đóng gói toàn bộ nội dung vào một thẻ container chuẩn kích thước -->
+<div class="document-container" id="pdf-content">
 
-<div class="header-wrap">
-  <div class="logo-cell">
-    <img class="logo-img" src="https://thacoindustries.com/wp-content/uploads/2023/08/LOGO_24-7-2023-01.png" alt="THACO Industries">
-  </div>
-  <div class="company-cell">
-    <div class="company-name">CÔNG TY TNHH TỔ HỢP CƠ KHÍ THACO</div>
-    <div class="company-info">
-      Địa Chỉ: KCN Cơ khí Ô tô Chu Lai Trường Hải - Xã Núi Thành - Thành Phố Đà Nẵng<br>
-      Điện Thoại: <span id="hdr-phone">0253.565.327</span>&nbsp;&nbsp;&nbsp;MST: <span id="hdr-mst">4001264725</span>
+  <div class="doc-ref">QT.TOMC.TKVT/06-BM01</div>
+
+  <div class="header-wrap">
+    <div class="logo-cell">
+      <img class="logo-img" src="https://thacoindustries.com/wp-content/uploads/2023/08/LOGO_24-7-2023-01.png" alt="THACO Industries">
+    </div>
+    <div class="company-cell">
+      <div class="company-name">CÔNG TY TNHH TỔ HỢP CƠ KHÍ THACO</div>
+      <div class="company-info">
+        Địa Chỉ: KCN Cơ khí Ô tô Chu Lai Trường Hải - Xã Núi Thành - Thành Phố Đà Nẵng<br>
+        Điện Thoại: <span id="hdr-phone">0253.565.327</span>&nbsp;&nbsp;&nbsp;MST: <span id="hdr-mst">4001264725</span>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="title-container">
-  <div class="doc-title">
-    <h1>Biên Bản Giao Nhận Hàng</h1>
-  </div>
-  <div class="doc-date-place" id="el-dateplace">Chu Lai, ngày <span id="el-day"></span></div>
-  <div class="doc-so">SỐ: <span id="el-sohd"></span></div>
-</div>
-
-<div class="parties">
-  <div><span class="party-title">A. BÊN GIAO: </span><span id="el-bengiao" style="font-weight:bold;">CÔNG TY TNHH TỔ HỢP CƠ KHÍ THACO</span></div>
-  <div class="party-row"><span>Địa chỉ:</span><span id="el-diachi-giao">KCN Cơ khí Ô tô Chu Lai Trường Hải - Xã Núi Thành - Thành Phố Đà Nẵng</span></div>
-  <div class="inline-fields">
-    <div><span class="field-label">Đại diện: </span><span class="field-value" id="el-daidien-giao">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-    <div><span class="field-label">Điện thoại: </span><span class="field-value" id="el-dt-giao">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+  <div class="title-container">
+    <div class="doc-title">
+      <h1>Biên Bản Giao Nhận Hàng</h1>
+    </div>
+    <div class="doc-date-place" id="el-dateplace">Chu Lai, ngày <span id="el-day"></span></div>
+    <div class="doc-so">SỐ: <span id="el-sohd"></span></div>
   </div>
 
-  <div style="margin-top:1.5mm"><span class="party-title">B. BÊN NHẬN: </span><span id="el-bennhan" style="font-weight:bold;"></span></div>
-  <div class="party-row"><span>Địa chỉ:</span><span id="el-diachi-nhan">KCN Cơ khí Ô tô Chu Lai Trường Hải - Xã Núi Thành - Thành Phố Đà Nẵng</span></div>
-  <div class="inline-fields">
-    <div><span class="field-label">Đại diện: </span><span class="field-value" id="el-daidien-nhan">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-    <div><span class="field-label">Điện thoại: </span><span class="field-value" id="el-dt-nhan">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+  <div class="parties">
+    <div><span class="party-title">A. BÊN GIAO: </span><span id="el-bengiao" style="font-weight:bold;">CÔNG TY TNHH TỔ HỢP CƠ KHÍ THACO</span></div>
+    <div class="party-row"><span>Địa chỉ:</span><span id="el-diachi-giao">KCN Cơ khí Ô tô Chu Lai Trường Hải - Xã Núi Thành - Thành Phố Đà Nẵng</span></div>
+    <div class="inline-fields">
+      <div><span class="field-label">Đại diện: </span><span class="field-value" id="el-daidien-giao">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+      <div><span class="field-label">Điện thoại: </span><span class="field-value" id="el-dt-giao">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+    </div>
+
+    <div style="margin-top:1.5mm"><span class="party-title">B. BÊN NHẬN: </span><span id="el-bennhan" style="font-weight:bold;"></span></div>
+    <div class="party-row"><span>Địa chỉ:</span><span id="el-diachi-nhan">KCN Cơ khí Ô tô Chu Lai Trường Hải - Xã Núi Thành - Thành Phố Đà Nẵng</span></div>
+    <div class="inline-fields">
+      <div><span class="field-label">Đại diện: </span><span class="field-value" id="el-daidien-nhan">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+      <div><span class="field-label">Điện thoại: </span><span class="field-value" id="el-dt-nhan">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+    </div>
+
+    <div style="margin-top:1.5mm"><span class="party-title">C. BÊN VẬN CHUYỂN:</span></div>
+    <div class="inline-fields">
+      <div><span class="field-label">Tên tài xế: </span><span class="field-value" id="el-taixe">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+      <div><span class="field-label">Điện thoại: </span><span class="field-value" id="el-dt-taixe">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+    </div>
+    <div><span class="field-label">BSX: </span><span class="field-value" id="el-bsx" style="min-width:30mm;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
   </div>
 
-  <div style="margin-top:1.5mm"><span class="party-title">C. BÊN VẬN CHUYỂN:</span></div>
-  <div class="inline-fields">
-    <div><span class="field-label">Tên tài xế: </span><span class="field-value" id="el-taixe">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-    <div><span class="field-label">Điện thoại: </span><span class="field-value" id="el-dt-taixe">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-  </div>
-  <div><span class="field-label">BSX: </span><span class="field-value" id="el-bsx" style="min-width:30mm;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-</div>
+  <div class="intro">Các bên tiến hành giao nhận hàng hóa với nội dung sau:</div>
 
-<div class="intro">Các bên tiến hành giao nhận hàng hóa với nội dung sau:</div>
+  <table>
+    <thead>
+      <tr>
+        <th>MỤC</th>
+        <th>LSX-ĐH</th>
+        <th>SỐ PO</th>
+        <th>MÃ SP</th>
+        <th>TÊN CHI TIẾT</th>
+        <th>ĐVT</th>
+        <th>SL</th>
+        <th>GHI CHÚ</th>
+      </tr>
+    </thead>
+    <tbody id="table-body">
+    </tbody>
+    <tfoot>
+      <tr class="row-total">
+        <td colspan="6">Tổng cộng</td>
+        <td id="tong-sl"></td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
 
-<table>
-  <thead>
-    <tr>
-      <th>MỤC</th>
-      <th>LSX-ĐH</th>
-      <th>SỐ PO</th>
-      <th>MÃ SP</th>
-      <th>TÊN CHI TIẾT</th>
-      <th>ĐVT</th>
-      <th>SL</th>
-      <th>GHI CHÚ</th>
-    </tr>
-  </thead>
-  <tbody id="table-body">
-  </tbody>
-  <tfoot>
-    <tr class="row-total">
-      <td colspan="6">Tổng cộng</td>
-      <td id="tong-sl"></td>
-      <td></td>
-    </tr>
-  </tfoot>
-</table>
+  <div class="footer-note">Hàng khô ráo, đúng quy cách</div>
+  <div class="footer-note-bold">Ghi chú: - Biên bản này được lập 03 bản, có giá trị pháp lý như nhau, mỗi bên giữ 01 bản</div>
 
-<div class="footer-note">Hàng khô ráo, đúng quy cách</div>
-<div class="footer-note-bold">Ghi chú: - Biên bản này được lập 03 bản, có giá trị pháp lý như nhau, mỗi bên giữ 01 bản</div>
+  <div class="sig-section">
+    <div class="sig-box">
+      <div class="sig-title">Duyệt</div>
+      <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
+      <div class="sig-space"></div>
+      <div class="sig-name" id="sig-giao"></div>
+    </div>
+    <div class="sig-box">
+      <div class="sig-title">P. Chất<br>Lượng</div>
+      <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
+      <div class="sig-space"></div>
+    </div>
+    <div class="sig-box">
+      <div class="sig-title">Bên giao</div>
+      <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
+      <div class="sig-space"></div>
+    </div>
+    <div class="sig-box">
+      <div class="sig-title">Bảo Vệ</div>
+      <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
+      <div class="sig-space"></div>
+    </div>
+    <div class="sig-box">
+      <div class="sig-title">Bên Vận<br>Chuyển</div>
+      <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
+      <div class="sig-space"></div>
+    </div>
+    <div class="sig-box">
+      <div class="sig-title">Bên Nhận</div>
+      <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
+      <div class="sig-space"></div>
+    </div>
+    <div class="sig-box">
+      <div class="sig-title">Người Lập</div>
+      <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
+      <div class="sig-space"></div>
+      <div class="sig-name" id="sig-nguoilap" style="display: none;"></div>
+    </div>
+  </div>
 
-<div class="sig-section">
-  <div class="sig-box">
-    <div class="sig-title">Duyệt</div>
-    <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
-    <div class="sig-space"></div>
-    <div class="sig-name" id="sig-giao"></div>
-  </div>
-  <div class="sig-box">
-    <div class="sig-title">P. Chất<br>Lượng</div>
-    <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
-    <div class="sig-space"></div>
-  </div>
-  <div class="sig-box">
-    <div class="sig-title">Bên giao</div>
-    <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
-    <div class="sig-space"></div>
-  </div>
-  <div class="sig-box">
-    <div class="sig-title">Bảo Vệ</div>
-    <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
-    <div class="sig-space"></div>
-  </div>
-  <div class="sig-box">
-    <div class="sig-title">Bên Vận<br>Chuyển</div>
-    <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
-    <div class="sig-space"></div>
-  </div>
-  <div class="sig-box">
-    <div class="sig-title">Bên Nhận</div>
-    <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
-    <div class="sig-space"></div>
-  </div>
-  <div class="sig-box">
-    <div class="sig-title">Người Lập</div>
-    <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
-    <div class="sig-space"></div>
-    <div class="sig-name" id="sig-nguoilap" style="display: none;"></div>
-  </div>
 </div>
 
 <script>
@@ -507,21 +519,23 @@ if (rawItems) {
     tbody.appendChild(tr);
   });
 } else {
+  // Demo dữ liệu chuẩn hóa khớp hoàn toàn với cấu trúc hình số 1
   const demo = [
-    ['TBNN.15/06', '1', 'CKM7-4', 'Bulong 12x50 ren 40 mạ đen', 'CT', 100, 'BBGH02072026-AD2-001', 'Kết cấu kệ kho mát 2 - XĐG chuối LP3, LP1, BP2'],
-    ['TBNN.15/06', '2', 'CKM7-4', 'Bulong 12x50 ren 40 mạ đen', 'CT', 1, 'BBGH02072026-AD2-001', 'Kết cấu kệ kho mát 2 - XĐG chuối LP3, LP1, BP2'],
+    ['ID.1410/06', '4', 'TOMC2026-06-26-096', '', 'H4', 'CT', '50', 'Tấm đan mương, hạng mục đậy máng điện khí xưởng hàn TBDD'],
+    ['ID.1410/06', '1', 'TOMC2026-06-26-096', '', 'H1', 'CT', '50', 'Tấm đan mương, hạng mục đậy máng điện khí xưởng hàn TBDD'],
+    ['ID.1410/06', '2', 'TOMC2026-06-26-096', '', 'H2', 'CT', '5000', 'Tấm đan mương, hạng mục đậy máng điện khí xưởng hàn TBDD'],
   ];
   demo.forEach((d) => {
-    tongSL += d[5];
+    tongSL += parseFloat(d[6]) || 0;
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="stt">${d[1]}</td>
       <td class="lsx">${d[0]}</td>
-      <td class="po">${d[6]}</td>
-      <td class="masp">${d[2]}</td>
-      <td class="ten">${d[3]}</td>
-      <td class="dvt">${d[4]}</td>
-      <td class="sl">${d[5]}</td>
+      <td class="po">${d[2]}</td>
+      <td class="masp">${d[3]}</td>
+      <td class="ten">${d[4]}</td>
+      <td class="dvt">${d[5]}</td>
+      <td class="sl">${d[6]}</td>
       <td class="ghichu">${d[7]}</td>
     `;
     tbody.appendChild(tr);
@@ -562,29 +576,26 @@ function autoMergeTableCells() {
   });
 }
 
-// ── HÀM XUẤT FILE PDF TỈ LỆ 1:1 CHUẨN GIAO DIỆN ──
+// ── HÀM XUẤT FILE PDF TỈ LỆ 1:1 KHÔNG BỊ BÓP MÉO ──
 function exportToPDF() {
-  // Cấu hình html2pdf để giữ nguyên CSS và cấu trúc bảng đã gộp
+  const element = document.getElementById('pdf-content');
+  
+  // Tùy chỉnh cấu hình html2pdf tối ưu hóa cho thẻ container 210mm cố định
   const opt = {
-    margin:       [20, 15, 20, 30], // Khớp margin mm với file CSS gốc
+    margin:       0, // Đặt bằng 0 vì lề (padding) đã được quản lý chuẩn xác trực tiếp bên trong .document-container
     filename:     'Bien_ban_giao_nhan_hang_' + (soHD !== '_______________' ? soHD : '') + '.pdf',
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2, useCORS: true }, // Tăng độ nét canvas lên x2, cho phép tải ảnh Logo
+    image:        { type: 'jpeg', quality: 1.0 },
+    html2canvas:  { 
+      scale: 2, 
+      useCORS: true, 
+      logging: false,
+      width: 793, // Kích thước chiều ngang pixel tương đương chính xác 210mm trên canvas
+    },
     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
   };
   
-  // Tạm thời ẩn các nút bấm trước khi xuất file để tránh dính nút vào PDF
-  const controls = document.querySelector('.action-controls');
-  controls.style.display = 'none';
-  
-  // Thực hiện render PDF trực tiếp từ body
-  html2pdf().set(opt).from(document.body).save().then(() => {
-    // Hiển thị lại cụm nút điều khiển sau khi xuất file xong
-    controls.style.display = 'flex';
-  }).catch((err) => {
-    console.error(err);
-    controls.style.display = 'flex';
-  });
+  // Tiến hành xuất PDF trực tiếp từ khung container chuẩn
+  html2pdf().set(opt).from(element).save();
 }
 </script>
 </body>
