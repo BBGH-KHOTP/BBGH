@@ -56,7 +56,7 @@
   }
   .debug-panel .dbg-key {
     color: #9cdcfe;
-    min-width: 130px;
+    min-width: 140px;
     font-weight: bold;
     flex-shrink: 0;
   }
@@ -70,6 +70,10 @@
     background: #1a3a2a;
     padding: 0 4px;
     border-radius: 2px;
+  }
+  .debug-panel .dbg-val.swapped {
+    color: #f44747;
+    font-weight: bold;
   }
   .debug-panel .dbg-section {
     color: #dcdcaa;
@@ -343,7 +347,7 @@
 <button class="btn-debug no-print" id="btnDebug" onclick="toggleDebug()">🔧 Debug URL</button>
 
 <div class="debug-panel" id="debugPanel">
-  <div class="dbg-title">📋 Tất cả tham số từ hệ thống</div>
+  <div class="dbg-title">📋 Tham số từ hệ thống</div>
   <div id="debugContent"></div>
 </div>
 
@@ -426,7 +430,6 @@
     <div class="sig-title">Duyệt</div>
     <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
     <div class="sig-space"></div>
-    <div class="sig-name" id="sig-giao"></div>
   </div>
   <div class="sig-box">
     <div class="sig-title">P. Chất<br>Lượng</div>
@@ -462,176 +465,160 @@
 
 <script>
 // ═══════════════════════════════════════════════════════════
-// DEBUG PANEL
+// DEBUG
 // ═══════════════════════════════════════════════════════════
 function toggleDebug() {
   document.getElementById('debugPanel').classList.toggle('open');
   document.getElementById('btnDebug').classList.toggle('active');
 }
 
-// ═══════════════════════════════════════════════════════════
-// ĐỌC THAM SỐ URL
-// ═══════════════════════════════════════════════════════════
 var urlParams = new URLSearchParams(window.location.search);
+function q(name) { return urlParams.get(name) || ''; }
+function set(id, val) { var el = document.getElementById(id); if (el && val) el.textContent = val; }
 
-function q(name) {
-  return urlParams.get(name) || '';
-}
-
-function set(id, val) {
-  var el = document.getElementById(id);
-  if (el && val) el.textContent = val;
-}
-
-// ═══════════════════════════════════════════════════════════
-// KIỂM TRA GIÁ TRỊ CÓ PHẢI NGÀY KHÔNG
-// ═══════════════════════════════════════════════════════════
 function looksLikeDate(val) {
   if (!val) return false;
-  var s = val.trim();
-  // dd/mm/yyyy, d/m/yyyy, dd-mm-yyyy, yyyy-mm-dd, yyyy/mm/dd
-  return /^(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}|\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2})$/.test(s);
+  return /^(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}|\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2})$/.test(val.trim());
 }
 
 // ═══════════════════════════════════════════════════════════
-// FORMAT NGÀY — KHÔNG DÙNG new Date(string) TRỪ ISO
+// FORMAT NGÀY — TỰ ĐỘNG NHẬN DIỆN DD/MM vs MM/DD
 // ═══════════════════════════════════════════════════════════
+var _lastSwap = false; // Cờ đánh dấu đã swap
+
 function formatDate(raw) {
+  _lastSwap = false;
   if (!raw) return '';
   var s = raw.trim();
   var dd, mm, yyyy;
 
-  // 1) dd/mm/yyyy hoặc d/m/yyyy (phổ biến nhất VN)
+  // ── dd/mm/yyyy hoặc d/m/yyyy ──
   if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
     var p = s.split('/');
-    dd   = parseInt(p[0], 10);
-    mm   = parseInt(p[1], 10);
+    var a = parseInt(p[0], 10);
+    var b = parseInt(p[1], 10);
     yyyy = parseInt(p[2], 10);
+
+    // Nếu "tháng" > 12 → chắc chắn là MM/DD/YYYY → swap
+    if (b > 12) {
+      mm = a;
+      dd = b;
+      _lastSwap = true;
+    }
+    // Nếu "ngày" > 12 và "tháng" ≤ 12 → cũng có thể là MM/DD
+    else if (a > 12 && b <= 12) {
+      mm = a;
+      dd = b;
+      _lastSwap = true;
+    }
+    // Mặc định: DD/MM/YYYY
+    else {
+      dd = a;
+      mm = b;
+    }
   }
-  // 2) dd-mm-yyyy
+  // ── dd-mm-yyyy ──
   else if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(s)) {
     var p = s.split('-');
-    dd   = parseInt(p[0], 10);
-    mm   = parseInt(p[1], 10);
+    var a = parseInt(p[0], 10);
+    var b = parseInt(p[1], 10);
     yyyy = parseInt(p[2], 10);
+    if (b > 12) { mm = a; dd = b; _lastSwap = true; }
+    else if (a > 12 && b <= 12) { mm = a; dd = b; _lastSwap = true; }
+    else { dd = a; mm = b; }
   }
-  // 3) yyyy-mm-dd
+  // ── yyyy-mm-dd ──
   else if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(s)) {
     var p = s.split('-');
     yyyy = parseInt(p[0], 10);
-    mm   = parseInt(p[1], 10);
-    dd   = parseInt(p[2], 10);
+    mm = parseInt(p[1], 10);
+    dd = parseInt(p[2], 10);
   }
-  // 4) yyyy/mm/dd
+  // ── yyyy/mm/dd ──
   else if (/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(s)) {
     var p = s.split('/');
     yyyy = parseInt(p[0], 10);
-    mm   = parseInt(p[1], 10);
-    dd   = parseInt(p[2], 10);
+    mm = parseInt(p[1], 10);
+    dd = parseInt(p[2], 10);
   }
-  // 5) Timestamp 13 chữ số (mili-giây)
+  // ── Timestamp ──
   else if (/^\d{13}$/.test(s)) {
     var d = new Date(parseInt(s, 10));
-    dd   = d.getDate();
-    mm   = d.getMonth() + 1;
-    yyyy = d.getFullYear();
+    dd = d.getDate(); mm = d.getMonth() + 1; yyyy = d.getFullYear();
   }
-  // 6) Các format khác
   else {
     var d = new Date(s);
     if (isNaN(d.getTime()) || d.getFullYear() < 1900 || d.getFullYear() > 2100) return raw;
-    dd   = d.getDate();
-    mm   = d.getMonth() + 1;
-    yyyy = d.getFullYear();
+    dd = d.getDate(); mm = d.getMonth() + 1; yyyy = d.getFullYear();
   }
 
-  // Kiểm tra hợp lệ
   if (!dd || !mm || !yyyy || mm < 1 || mm > 12 || dd < 1 || dd > 31) return raw;
 
   return String(dd).padStart(2, '0') + '/' + String(mm).padStart(2, '0') + '/' + yyyy;
 }
 
 // ═══════════════════════════════════════════════════════════
-// TÌM NGÀY TỪ TẤT CẢ PARAMS
+// TÌM NGÀY
 // ═══════════════════════════════════════════════════════════
-function findDateFromAllParams() {
-  // Ưu tiên các tên tham số phổ biến (không phân biệt hoa/thường)
-  var priority = ['ngay', 'date', 'ngaytao', 'createdate', 'delivery_date',
-                  'ngaygiao', 'ngay_nhap', 'Ngay', 'Date', 'NGAY', 'DATE',
-                  'ngay_tao', 'create_date', 'transaction_date'];
-
-  for (var i = 0; i < priority.length; i++) {
-    var val = q(priority[i]);
-    if (val && looksLikeDate(val)) return val;
+function findDate() {
+  var keys = ['ngay','date','ngaytao','createdate','delivery_date',
+              'ngaygiao','ngay_nhap','Ngay','Date','NGAY','DATE',
+              'ngay_tao','create_date','transaction_date'];
+  for (var i = 0; i < keys.length; i++) {
+    var v = q(keys[i]);
+    if (v && looksLikeDate(v)) return v;
   }
-
-  // Quét toàn bộ params, tìm giá trị nào giống ngày
   var found = null;
-  urlParams.forEach(function(val, key) {
-    if (!found && looksLikeDate(val)) {
-      found = val;
-    }
+  urlParams.forEach(function(val) {
+    if (!found && looksLikeDate(val)) found = val;
   });
   return found || '';
 }
 
 // ═══════════════════════════════════════════════════════════
-// XÂY DỰNG DEBUG PANEL
+// BUILD DEBUG
 // ═══════════════════════════════════════════════════════════
 (function buildDebug() {
-  var container = document.getElementById('debugContent');
-  var html = '<div class="dbg-section">── Tham số URL ──</div>';
-  var paramCount = 0;
-
+  var c = document.getElementById('debugContent');
+  var h = '<div class="dbg-section">── Tham số URL ──</div>';
+  var n = 0;
   urlParams.forEach(function(val, key) {
-    paramCount++;
-    var isDate = looksLikeDate(val);
-    html += '<div class="dbg-row">' +
-              '<span class="dbg-key">' + key + '</span>' +
-              '<span class="dbg-val' + (isDate ? ' is-date' : '') + '">' +
-                val +
-                (isDate ? ' ✅ NGÀY' : '') +
-              '</span>' +
-            '</div>';
+    n++;
+    var isD = looksLikeDate(val);
+    h += '<div class="dbg-row"><span class="dbg-key">' + key + '</span><span class="dbg-val' + (isD ? ' is-date' : '') + '">' + val + (isD ? ' ✅ NGÀY' : '') + '</span></div>';
   });
+  if (n === 0) h += '<div class="dbg-note">⚠ KHÔNG CÓ tham số URL!</div>';
 
-  if (paramCount === 0) {
-    html += '<div class="dbg-note">⚠ KHÔNG CÓ tham số URL nào!</div>';
+  var raw = findDate();
+  var fmt = formatDate(raw);
+  h += '<div class="dbg-section">── Kết quả xử lý ngày ──</div>';
+  h += '<div class="dbg-row"><span class="dbg-key">Ngày gốc</span><span class="dbg-val is-date">' + (raw || '(không tìm thấy)') + '</span></div>';
+  h += '<div class="dbg-row"><span class="dbg-key">Ngày hiển thị</span><span class="dbg-val is-date">' + (fmt || '(không tìm thấy)') + '</span></div>';
+  if (_lastSwap) {
+    h += '<div class="dbg-row"><span class="dbg-key">⚠ Phát hiện</span><span class="dbg-val swapped">Hệ thống gửi MM/DD/YYYY → đã tự swap thành DD/MM/YYYY</span></div>';
   }
-
-  // Hiển thị ngày đã tìm được
-  var rawDate = findDateFromAllParams();
-  var fmtDate = formatDate(rawDate);
-  html += '<div class="dbg-section">── Kết quả xử lý ngày ──</div>';
-  html += '<div class="dbg-row"><span class="dbg-key">Ngày gốc (raw)</span><span class="dbg-val is-date">' + (rawDate || '(không tìm thấy)') + '</span></div>';
-  html += '<div class="dbg-row"><span class="dbg-key">Ngày format</span><span class="dbg-val is-date">' + (fmtDate || '(không tìm thấy)') + '</span></div>';
-
-  html += '<div class="dbg-note">URL: ' + window.location.href + '</div>';
-  html += '<div class="dbg-note">⚠ Kiểm tra hiển thị thời gian, dữ liệu BBGH sai: Liên hệ Zalo Tuấn 0349768399</div>';
-
-  container.innerHTML = html;
+  h += '<div class="dbg-note">URL: ' + window.location.href + '</div>';
+  c.innerHTML = h;
 })();
 
 // ═══════════════════════════════════════════════════════════
-// ĐIỀN DỮ LIỆU VÀO BIÊN BẢN
+// ĐIỀN DỮ LIỆU
 // ═══════════════════════════════════════════════════════════
-var soHD     = q('so')      || q('sohd')   || q('So')      || q('SOHD')   || '_______________';
-var benNhan  = q('bennhan') || q('khach')  || q('tennhan') || '_______________';
-var taixe    = q('taixe')   || '';
-var bsx      = q('bsx')     || '';
-var dtNhan   = q('dtnhan')  || '';
-var dtTaixe  = q('dttaixe') || '';
+var soHD    = q('so') || q('sohd') || q('So') || q('SOHD') || '_______________';
+var benNhan = q('bennhan') || q('khach') || q('tennhan') || '_______________';
+var taixe   = q('taixe') || '';
+var bsx     = q('bsx') || '';
+var dtNhan  = q('dtnhan') || '';
+var dtTaixe = q('dttaixe') || '';
 
-set('el-sohd',    soHD);
+set('el-sohd', soHD);
 set('el-bennhan', benNhan);
-if (taixe)   set('el-taixe',   taixe);
-if (bsx)     set('el-bsx',     bsx);
+if (taixe)   set('el-taixe', taixe);
+if (bsx)     set('el-bsx', bsx);
 if (dtNhan)  set('el-dt-nhan', dtNhan);
 if (dtTaixe) set('el-dt-taixe', dtTaixe);
 
-// Ngày
-var ngayRaw  = findDateFromAllParams();
-var ngayFmt  = formatDate(ngayRaw);
+var ngayFmt = formatDate(findDate());
 if (ngayFmt) {
   set('el-day', ngayFmt);
 } else {
@@ -646,56 +633,36 @@ var tbody = document.getElementById('table-body');
 var tongSL = 0;
 
 if (rawItems) {
-  var rows = rawItems.replace(/,(\s*\|\|)/g, '$1').split('||');
-
-  rows.forEach(function(row) {
-    var cleanRow = row.trim();
-    if (!cleanRow || cleanRow === ',') return;
-    if (cleanRow.startsWith(',')) cleanRow = cleanRow.substring(1);
-
-    var cols = cleanRow.split('|');
+  rawItems.replace(/,(\s*\|\|)/g, '$1').split('||').forEach(function(row) {
+    var c = row.trim();
+    if (!c || c === ',') return;
+    if (c.startsWith(',')) c = c.substring(1);
+    var cols = c.split('|');
     if (cols.length < 7) return;
 
-    var lsx    = cols[0] || '';
-    var muc    = cols[1] || '';
-    var masp   = cols[2] || '';
-    var ten    = cols[3] || '';
-    var dvt    = cols[4] || '';
-    var sl     = cols[5] || '';
-    var po     = cols[6] || '';
-    var ghichu = cols[7] || '';
-
-    tongSL += (parseFloat(sl) || 0);
-
+    tongSL += (parseFloat(cols[5]) || 0);
     var tr = document.createElement('tr');
     tr.innerHTML =
-      '<td class="stt">'    + muc    + '</td>' +
-      '<td class="lsx">'    + lsx    + '</td>' +
-      '<td class="po">'     + po     + '</td>' +
-      '<td class="masp">'   + masp   + '</td>' +
-      '<td class="ten">'    + ten    + '</td>' +
-      '<td class="dvt">'    + dvt    + '</td>' +
-      '<td class="sl">'     + sl     + '</td>' +
-      '<td class="ghichu">' + ghichu + '</td>';
+      '<td class="stt">'    + (cols[1]||'') + '</td>' +
+      '<td class="lsx">'    + (cols[0]||'') + '</td>' +
+      '<td class="po">'     + (cols[6]||'') + '</td>' +
+      '<td class="masp">'   + (cols[2]||'') + '</td>' +
+      '<td class="ten">'    + (cols[3]||'') + '</td>' +
+      '<td class="dvt">'    + (cols[4]||'') + '</td>' +
+      '<td class="sl">'     + (cols[5]||'') + '</td>' +
+      '<td class="ghichu">' + (cols[7]||'') + '</td>';
     tbody.appendChild(tr);
   });
 } else {
-  var demo = [
-    ['TBNN.15/06', '1', 'CKM7-4', 'Bulong 12x50 ren 40 mạ đen', 'CT', 100, 'BBGH02072026-AD2-001', 'Kết cấu kệ kho mát 2'],
-    ['TBNN.15/06', '2', 'CKM7-4', 'Bulong 12x50 ren 40 mạ đen', 'CT', 1, 'BBGH02072026-AD2-001', 'Kết cấu kệ kho mát 2'],
-  ];
-  demo.forEach(function(d) {
+  [['TBNN.15/06','1','CKM7-4','Bulong 12x50 ren 40 mạ đen','CT',100,'BBGH02072026-AD2-001','Kết cấu kệ kho mát 2'],
+   ['TBNN.15/06','2','CKM7-4','Bulong 12x50 ren 40 mạ đen','CT',1,'BBGH02072026-AD2-001','Kết cấu kệ kho mát 2']].forEach(function(d) {
     tongSL += d[5];
     var tr = document.createElement('tr');
     tr.innerHTML =
-      '<td class="stt">'    + d[1] + '</td>' +
-      '<td class="lsx">'    + d[0] + '</td>' +
-      '<td class="po">'     + d[6] + '</td>' +
-      '<td class="masp">'   + d[2] + '</td>' +
-      '<td class="ten">'    + d[3] + '</td>' +
-      '<td class="dvt">'    + d[4] + '</td>' +
-      '<td class="sl">'     + d[5] + '</td>' +
-      '<td class="ghichu">' + d[7] + '</td>';
+      '<td class="stt">'    + d[1] + '</td><td class="lsx">' + d[0] + '</td>' +
+      '<td class="po">'     + d[6] + '</td><td class="masp">' + d[2] + '</td>' +
+      '<td class="ten">'    + d[3] + '</td><td class="dvt">'  + d[4] + '</td>' +
+      '<td class="sl">'     + d[5] + '</td><td class="ghichu">' + d[7] + '</td>';
     tbody.appendChild(tr);
   });
 }
@@ -705,7 +672,7 @@ document.getElementById('tong-sl').textContent = tongSL || '';
 // ═══════════════════════════════════════════════════════════
 // GỘP Ô TRÙNG
 // ═══════════════════════════════════════════════════════════
-(function autoMerge() {
+(function() {
   var rows = tbody.getElementsByTagName('tr');
   if (rows.length <= 1) return;
   [1, 2, 7].forEach(function(ci) {
