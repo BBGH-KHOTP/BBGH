@@ -20,6 +20,90 @@
     padding: 20mm 15mm 20mm 30mm;
   }
 
+  .debug-panel {
+    display: none;
+    position: fixed;
+    top: 50px;
+    right: 10px;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 11px;
+    line-height: 1.7;
+    max-width: 560px;
+    max-height: 85vh;
+    overflow: auto;
+    z-index: 1000;
+    box-shadow: 0 4px 20px rgba(0,0,0,.5);
+    border: 1px solid #444;
+  }
+  .debug-panel.open { display: block; }
+  .debug-panel .dbg-title {
+    color: #569cd6;
+    font-weight: bold;
+    font-size: 13px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 6px;
+  }
+  .debug-panel .dbg-row {
+    display: flex;
+    gap: 8px;
+    padding: 3px 0;
+    border-bottom: 1px solid #2a2a2a;
+  }
+  .debug-panel .dbg-key {
+    color: #9cdcfe;
+    min-width: 130px;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+  .debug-panel .dbg-val {
+    color: #ce9178;
+    word-break: break-all;
+  }
+  .debug-panel .dbg-val.is-date {
+    color: #4ec9b0;
+    font-weight: bold;
+    background: #1a3a2a;
+    padding: 0 4px;
+    border-radius: 2px;
+  }
+  .debug-panel .dbg-section {
+    color: #dcdcaa;
+    font-weight: bold;
+    margin-top: 10px;
+    margin-bottom: 4px;
+    font-size: 12px;
+  }
+  .debug-panel .dbg-note {
+    color: #6a9955;
+    margin-top: 10px;
+    font-style: italic;
+    font-size: 10px;
+    line-height: 1.5;
+  }
+
+  .btn-debug {
+    position: fixed;
+    top: 50px;
+    right: 10px;
+    background: #e67e22;
+    color: #fff;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    z-index: 1001;
+    box-shadow: 0 2px 6px rgba(0,0,0,.3);
+    font-family: Arial, sans-serif;
+  }
+  .btn-debug:hover { background: #d35400; }
+  .btn-debug.active { background: #c0392b; }
+
   .header-wrap {
     display: flex;
     align-items: center;
@@ -150,14 +234,14 @@
     border-collapse: collapse;
     font-size: 9pt;
     margin: 2mm 0;
-    table-layout: fixed; 
+    table-layout: fixed;
   }
 
   th, td {
     border: 1px solid #000;
-    padding: 2mm 1mm; 
+    padding: 2mm 1mm;
     vertical-align: middle;
-    word-break: break-word; 
+    word-break: break-word;
   }
 
   thead th {
@@ -171,26 +255,11 @@
   td.stt, th:nth-child(1) { width: 5%; text-align: center; }
   td.masp, th:nth-child(4) { width: 11%; text-align: center; }
   td.dvt, th:nth-child(6) { width: 6%; text-align: center; }
-  
-  td.sl, th:nth-child(7) { 
-    width: 7%; 
-    text-align: center; 
-    font-weight: bold; 
-    white-space: normal; 
-  }
-
+  td.sl, th:nth-child(7) { width: 7%; text-align: center; font-weight: bold; white-space: normal; }
   td.lsx, th:nth-child(2) { width: 16%; text-align: center; }
   td.po,  th:nth-child(3) { width: 16%; text-align: center; }
-
-  td.ten { 
-    text-align: left;   
-    width: 22%; 
-  }
-  
-  td.ghichu { 
-    text-align: left;   
-    width: 17%; 
-  }
+  td.ten  { text-align: left; width: 22%; }
+  td.ghichu { text-align: left; width: 17%; }
 
   .row-total td {
     font-weight: bold;
@@ -250,6 +319,8 @@
   @media print {
     body { padding: 0; }
     .no-print { display: none !important; }
+    .debug-panel { display: none !important; }
+    .btn-debug { display: none !important; }
   }
 
   @media screen {
@@ -260,6 +331,7 @@
       border: none; padding: 8px 18px;
       border-radius: 4px; font-size: 12pt; cursor: pointer;
       z-index: 999; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+      font-family: Arial, sans-serif;
     }
     .btn-print:hover { background: #154360; }
   }
@@ -268,6 +340,12 @@
 <body>
 
 <button class="btn-print no-print" onclick="window.print()">🖨️ In</button>
+<button class="btn-debug no-print" id="btnDebug" onclick="toggleDebug()">🔧 Debug URL</button>
+
+<div class="debug-panel" id="debugPanel">
+  <div class="dbg-title">📋 Tất cả tham số từ hệ thống</div>
+  <div id="debugContent"></div>
+</div>
 
 <div class="doc-ref">QT.TOMC.TKVT/06-BM01</div>
 
@@ -330,8 +408,7 @@
       <th>GHI CHÚ</th>
     </tr>
   </thead>
-  <tbody id="table-body">
-  </tbody>
+  <tbody id="table-body"></tbody>
   <tfoot>
     <tr class="row-total">
       <td colspan="6">Tổng cộng</td>
@@ -380,66 +457,170 @@
     <div class="sig-title">Người Lập</div>
     <div class="sig-sub">(Ký, ghi rõ họ tên)</div>
     <div class="sig-space"></div>
-    <div class="sig-name" id="sig-nguoilap" style="display: none;"></div>
   </div>
 </div>
 
 <script>
+// ═══════════════════════════════════════════════════════════
+// DEBUG PANEL
+// ═══════════════════════════════════════════════════════════
+function toggleDebug() {
+  document.getElementById('debugPanel').classList.toggle('open');
+  document.getElementById('btnDebug').classList.toggle('active');
+}
+
+// ═══════════════════════════════════════════════════════════
+// ĐỌC THAM SỐ URL
+// ═══════════════════════════════════════════════════════════
+var urlParams = new URLSearchParams(window.location.search);
+
 function q(name) {
-  const url = new URLSearchParams(window.location.search);
-  return url.get(name) || '';
+  return urlParams.get(name) || '';
 }
 
 function set(id, val) {
-  const el = document.getElementById(id);
+  var el = document.getElementById(id);
   if (el && val) el.textContent = val;
 }
 
-function formatDate(raw) {
-  if (!raw) return '';
-  let d;
-
-  // ── Fix chính: đổi \d{2} thành \d{1,2} để nhận cả ngày/tháng 1 chữ số ──
-  if (/^\d{1,2}\/\d{1,2}\/\d{4}/.test(raw)) {
-    const parts = raw.split('/');
-    const dd = parseInt(parts[0], 10);
-    const mm = parseInt(parts[1], 10);
-    const yyyy = parseInt(parts[2], 10);
-    d = new Date(yyyy, mm - 1, dd);
-  }
-  // ── Format yyyy-mm-dd hoặc yyyy/mm/dd ──
-  else if (/^\d{4}[-\/]\d{1,2}[-\/]\d{1,2}/.test(raw)) {
-    const parts = raw.split(/[-\/]/);
-    const yyyy = parseInt(parts[0], 10);
-    const mm = parseInt(parts[1], 10);
-    const dd = parseInt(parts[2], 10);
-    d = new Date(yyyy, mm - 1, dd);
-  }
-  // ── Timestamp (ms) ──
-  else if (/^\d{13}$/.test(raw)) {
-    d = new Date(parseInt(raw, 10));
-  }
-  else {
-    d = new Date(raw);
-  }
-
-  if (isNaN(d) || d.getFullYear() < 1900) return raw;
-
-  const dd = String(d.getDate()).padStart(2, '0');
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const yyyy = d.getFullYear();
-  return dd + '/' + mm + '/' + yyyy;
+// ═══════════════════════════════════════════════════════════
+// KIỂM TRA GIÁ TRỊ CÓ PHẢI NGÀY KHÔNG
+// ═══════════════════════════════════════════════════════════
+function looksLikeDate(val) {
+  if (!val) return false;
+  var s = val.trim();
+  // dd/mm/yyyy, d/m/yyyy, dd-mm-yyyy, yyyy-mm-dd, yyyy/mm/dd
+  return /^(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}|\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2})$/.test(s);
 }
 
-// ── ĐIỀN DỮ LIỆU ──
-const soHD     = q('so')      || q('sohd')   || '_______________';
-const ngay     = q('ngay')    || q('date')    || '';
-const benNhan  = q('bennhan') || q('khach')   || '_______________';
-const nguoiLap = q('nguoilap')|| '';
-const taixe    = q('taixe')   || '';
-const bsx      = q('bsx')     || '';
-const dtNhan   = q('dtnhan')  || '';
-const dtTaixe  = q('dttaixe') || '';
+// ═══════════════════════════════════════════════════════════
+// FORMAT NGÀY — KHÔNG DÙNG new Date(string) TRỪ ISO
+// ═══════════════════════════════════════════════════════════
+function formatDate(raw) {
+  if (!raw) return '';
+  var s = raw.trim();
+  var dd, mm, yyyy;
+
+  // 1) dd/mm/yyyy hoặc d/m/yyyy (phổ biến nhất VN)
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
+    var p = s.split('/');
+    dd   = parseInt(p[0], 10);
+    mm   = parseInt(p[1], 10);
+    yyyy = parseInt(p[2], 10);
+  }
+  // 2) dd-mm-yyyy
+  else if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(s)) {
+    var p = s.split('-');
+    dd   = parseInt(p[0], 10);
+    mm   = parseInt(p[1], 10);
+    yyyy = parseInt(p[2], 10);
+  }
+  // 3) yyyy-mm-dd
+  else if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(s)) {
+    var p = s.split('-');
+    yyyy = parseInt(p[0], 10);
+    mm   = parseInt(p[1], 10);
+    dd   = parseInt(p[2], 10);
+  }
+  // 4) yyyy/mm/dd
+  else if (/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(s)) {
+    var p = s.split('/');
+    yyyy = parseInt(p[0], 10);
+    mm   = parseInt(p[1], 10);
+    dd   = parseInt(p[2], 10);
+  }
+  // 5) Timestamp 13 chữ số (mili-giây)
+  else if (/^\d{13}$/.test(s)) {
+    var d = new Date(parseInt(s, 10));
+    dd   = d.getDate();
+    mm   = d.getMonth() + 1;
+    yyyy = d.getFullYear();
+  }
+  // 6) Các format khác
+  else {
+    var d = new Date(s);
+    if (isNaN(d.getTime()) || d.getFullYear() < 1900 || d.getFullYear() > 2100) return raw;
+    dd   = d.getDate();
+    mm   = d.getMonth() + 1;
+    yyyy = d.getFullYear();
+  }
+
+  // Kiểm tra hợp lệ
+  if (!dd || !mm || !yyyy || mm < 1 || mm > 12 || dd < 1 || dd > 31) return raw;
+
+  return String(dd).padStart(2, '0') + '/' + String(mm).padStart(2, '0') + '/' + yyyy;
+}
+
+// ═══════════════════════════════════════════════════════════
+// TÌM NGÀY TỪ TẤT CẢ PARAMS
+// ═══════════════════════════════════════════════════════════
+function findDateFromAllParams() {
+  // Ưu tiên các tên tham số phổ biến (không phân biệt hoa/thường)
+  var priority = ['ngay', 'date', 'ngaytao', 'createdate', 'delivery_date',
+                  'ngaygiao', 'ngay_nhap', 'Ngay', 'Date', 'NGAY', 'DATE',
+                  'ngay_tao', 'create_date', 'transaction_date'];
+
+  for (var i = 0; i < priority.length; i++) {
+    var val = q(priority[i]);
+    if (val && looksLikeDate(val)) return val;
+  }
+
+  // Quét toàn bộ params, tìm giá trị nào giống ngày
+  var found = null;
+  urlParams.forEach(function(val, key) {
+    if (!found && looksLikeDate(val)) {
+      found = val;
+    }
+  });
+  return found || '';
+}
+
+// ═══════════════════════════════════════════════════════════
+// XÂY DỰNG DEBUG PANEL
+// ═══════════════════════════════════════════════════════════
+(function buildDebug() {
+  var container = document.getElementById('debugContent');
+  var html = '<div class="dbg-section">── Tham số URL ──</div>';
+  var paramCount = 0;
+
+  urlParams.forEach(function(val, key) {
+    paramCount++;
+    var isDate = looksLikeDate(val);
+    html += '<div class="dbg-row">' +
+              '<span class="dbg-key">' + key + '</span>' +
+              '<span class="dbg-val' + (isDate ? ' is-date' : '') + '">' +
+                val +
+                (isDate ? ' ✅ NGÀY' : '') +
+              '</span>' +
+            '</div>';
+  });
+
+  if (paramCount === 0) {
+    html += '<div class="dbg-note">⚠ KHÔNG CÓ tham số URL nào!</div>';
+  }
+
+  // Hiển thị ngày đã tìm được
+  var rawDate = findDateFromAllParams();
+  var fmtDate = formatDate(rawDate);
+  html += '<div class="dbg-section">── Kết quả xử lý ngày ──</div>';
+  html += '<div class="dbg-row"><span class="dbg-key">Ngày gốc (raw)</span><span class="dbg-val is-date">' + (rawDate || '(không tìm thấy)') + '</span></div>';
+  html += '<div class="dbg-row"><span class="dbg-key">Ngày format</span><span class="dbg-val is-date">' + (fmtDate || '(không tìm thấy)') + '</span></div>';
+
+  html += '<div class="dbg-note">URL: ' + window.location.href + '</div>';
+  html += '<div class="dbg-note">⚠ Nếu ngày vẫn sai, chụp ảnh bảng này gửi developer.</div>';
+
+  container.innerHTML = html;
+})();
+
+// ═══════════════════════════════════════════════════════════
+// ĐIỀN DỮ LIỆU VÀO BIÊN BẢN
+// ═══════════════════════════════════════════════════════════
+var soHD     = q('so')      || q('sohd')   || q('So')      || q('SOHD')   || '_______________';
+var benNhan  = q('bennhan') || q('khach')  || q('tennhan') || '_______________';
+var taixe    = q('taixe')   || '';
+var bsx      = q('bsx')     || '';
+var dtNhan   = q('dtnhan')  || '';
+var dtTaixe  = q('dttaixe') || '';
 
 set('el-sohd',    soHD);
 set('el-bennhan', benNhan);
@@ -448,42 +629,45 @@ if (bsx)     set('el-bsx',     bsx);
 if (dtNhan)  set('el-dt-nhan', dtNhan);
 if (dtTaixe) set('el-dt-taixe', dtTaixe);
 
-const ngayFmt = formatDate(ngay);
+// Ngày
+var ngayRaw  = findDateFromAllParams();
+var ngayFmt  = formatDate(ngayRaw);
 if (ngayFmt) {
   set('el-day', ngayFmt);
 } else {
   document.getElementById('el-day').textContent = '___/___/______';
 }
 
-// ── BẢNG HÀNG HÓA ──
-const rawItems = q('items');
-const tbody = document.getElementById('table-body');
-let tongSL = 0;
+// ═══════════════════════════════════════════════════════════
+// BẢNG HÀNG HÓA
+// ═══════════════════════════════════════════════════════════
+var rawItems = q('items');
+var tbody = document.getElementById('table-body');
+var tongSL = 0;
 
 if (rawItems) {
-  const rows = rawItems.replace(/,(\s*\|\|)/g, '$1').split('||');
+  var rows = rawItems.replace(/,(\s*\|\|)/g, '$1').split('||');
 
   rows.forEach(function(row) {
-    let cleanRow = row.trim();
+    var cleanRow = row.trim();
     if (!cleanRow || cleanRow === ',') return;
     if (cleanRow.startsWith(',')) cleanRow = cleanRow.substring(1);
 
-    const cols = cleanRow.split('|');
+    var cols = cleanRow.split('|');
     if (cols.length < 7) return;
 
-    const lsx    = cols[0] || '';
-    const muc    = cols[1] || '';
-    const masp   = cols[2] || '';
-    const ten    = cols[3] || '';
-    const dvt    = cols[4] || '';
-    const sl     = cols[5] || '';
-    const po     = cols[6] || '';
-    const ghichu = cols[7] || '';
+    var lsx    = cols[0] || '';
+    var muc    = cols[1] || '';
+    var masp   = cols[2] || '';
+    var ten    = cols[3] || '';
+    var dvt    = cols[4] || '';
+    var sl     = cols[5] || '';
+    var po     = cols[6] || '';
+    var ghichu = cols[7] || '';
 
-    const slVal = parseFloat(sl) || 0;
-    tongSL += slVal;
+    tongSL += (parseFloat(sl) || 0);
 
-    const tr = document.createElement('tr');
+    var tr = document.createElement('tr');
     tr.innerHTML =
       '<td class="stt">'    + muc    + '</td>' +
       '<td class="lsx">'    + lsx    + '</td>' +
@@ -497,8 +681,8 @@ if (rawItems) {
   });
 } else {
   var demo = [
-    ['TBNN.15/06', '1', 'CKM7-4', 'Bulong 12x50 ren 40 mạ đen', 'CT', 100, 'BBGH02072026-AD2-001', 'Kết cấu kệ kho mát 2 - XĐG chuối LP3, LP1, BP2'],
-    ['TBNN.15/06', '2', 'CKM7-4', 'Bulong 12x50 ren 40 mạ đen', 'CT', 1, 'BBGH02072026-AD2-001', 'Kết cấu kệ kho mát 2 - XĐG chuối LP3, LP1, BP2'],
+    ['TBNN.15/06', '1', 'CKM7-4', 'Bulong 12x50 ren 40 mạ đen', 'CT', 100, 'BBGH02072026-AD2-001', 'Kết cấu kệ kho mát 2'],
+    ['TBNN.15/06', '2', 'CKM7-4', 'Bulong 12x50 ren 40 mạ đen', 'CT', 1, 'BBGH02072026-AD2-001', 'Kết cấu kệ kho mát 2'],
   ];
   demo.forEach(function(d) {
     tongSL += d[5];
@@ -518,40 +702,24 @@ if (rawItems) {
 
 document.getElementById('tong-sl').textContent = tongSL || '';
 
-// ── GỘP Ô TRÙNG ──
-autoMergeTableCells();
-
-function autoMergeTableCells() {
-  var tableRows = tbody.getElementsByTagName('tr');
-  if (tableRows.length <= 1) return;
-
-  var targetCols = [1, 2, 7];
-
-  targetCols.forEach(function(colIdx) {
-    var anchorCell = null;
-    var spanCount = 1;
-
-    for (var i = 0; i < tableRows.length; i++) {
-      var currentCell = tableRows[i].cells[colIdx];
-      if (!currentCell) continue;
-
-      if (anchorCell === null) {
-        anchorCell = currentCell;
-        spanCount = 1;
-      } else if (
-        currentCell.textContent.trim() === anchorCell.textContent.trim() &&
-        anchorCell.textContent.trim() !== ''
-      ) {
-        spanCount++;
-        anchorCell.rowSpan = spanCount;
-        currentCell.style.display = 'none';
-      } else {
-        anchorCell = currentCell;
-        spanCount = 1;
-      }
+// ═══════════════════════════════════════════════════════════
+// GỘP Ô TRÙNG
+// ═══════════════════════════════════════════════════════════
+(function autoMerge() {
+  var rows = tbody.getElementsByTagName('tr');
+  if (rows.length <= 1) return;
+  [1, 2, 7].forEach(function(ci) {
+    var anchor = null, span = 1;
+    for (var i = 0; i < rows.length; i++) {
+      var cell = rows[i].cells[ci];
+      if (!cell) continue;
+      if (!anchor) { anchor = cell; span = 1; }
+      else if (cell.textContent.trim() === anchor.textContent.trim() && anchor.textContent.trim() !== '') {
+        span++; anchor.rowSpan = span; cell.style.display = 'none';
+      } else { anchor = cell; span = 1; }
     }
   });
-}
+})();
 </script>
 </body>
 </html>
