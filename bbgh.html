@@ -20,7 +20,6 @@
     padding: 20mm 15mm 20mm 30mm;
   }
 
-  /* ── HEADER ── */
   .header-wrap {
     display: flex;
     align-items: center;
@@ -70,7 +69,6 @@
     color: #333;
   }
 
-  /* ── TITLE CONTAINER ── */
   .title-container {
     display: flex;
     flex-direction: column;
@@ -102,13 +100,12 @@
   }
 
   .doc-so {
-    text-align: right; /* Thay đổi từ center sang right để đẩy sang sát lề phải */
+    text-align: right;
     width: 100%;
     font-size: 10pt;
     font-weight: bold;
   }
 
-  /* ── PARTIES ── */
   .parties {
     margin-bottom: 2mm;
     font-size: 9.5pt;
@@ -143,13 +140,11 @@
     display: inline-block;
   }
 
-  /* ── INTRO TEXT ── */
   .intro {
     margin: 2mm 0;
     font-size: 9.5pt;
   }
 
-  /* ── TABLE ── */
   table {
     width: 100%;
     border-collapse: collapse;
@@ -173,7 +168,6 @@
     line-height: 1.3;
   }
 
-  /* Điều chỉnh tỷ lệ các cột */
   td.stt, th:nth-child(1) { width: 5%; text-align: center; }
   td.masp, th:nth-child(4) { width: 11%; text-align: center; }
   td.dvt, th:nth-child(6) { width: 6%; text-align: center; }
@@ -204,7 +198,6 @@
     background: #f9f9f9;
   }
 
-  /* ── FOOTER NOTES ── */
   .footer-note {
     font-size: 8.5pt;
     font-style: italic;
@@ -217,7 +210,6 @@
     margin-bottom: 3mm;
   }
 
-  /* ── SIGNATURES ── */
   .sig-section {
     display: flex;
     justify-content: space-between;
@@ -255,13 +247,11 @@
     font-weight: bold;
   }
 
-  /* ── PRINT ── */
   @media print {
     body { padding: 0; }
     .no-print { display: none !important; }
   }
 
-  /* ── SCREEN HELPERS ── */
   @media screen {
     body { max-width: 210mm; margin: 0 auto; box-shadow: 0 0 12px rgba(0,0,0,.15); }
     .btn-print {
@@ -395,136 +385,163 @@
 </div>
 
 <script>
-// ── ĐỌC QUERY STRING ──────────────────────────────────────────────
 function q(name) {
   const url = new URLSearchParams(window.location.search);
   return url.get(name) || '';
 }
 
-// ── HIỂN THỊ TEXT VÀO ELEMENT ──
 function set(id, val) {
   const el = document.getElementById(id);
   if (el && val) el.textContent = val;
 }
 
-// ── NGÀY THÁNG ──
 function formatDate(raw) {
   if (!raw) return '';
   let d;
-  if (/^\d{2}\/\d{2}\/\d{4}/.test(raw)) {
-    const [dd, mm, yyyy] = raw.split('/');
+
+  // ── Fix chính: đổi \d{2} thành \d{1,2} để nhận cả ngày/tháng 1 chữ số ──
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}/.test(raw)) {
+    const parts = raw.split('/');
+    const dd = parseInt(parts[0], 10);
+    const mm = parseInt(parts[1], 10);
+    const yyyy = parseInt(parts[2], 10);
     d = new Date(yyyy, mm - 1, dd);
-  } else {
+  }
+  // ── Format yyyy-mm-dd hoặc yyyy/mm/dd ──
+  else if (/^\d{4}[-\/]\d{1,2}[-\/]\d{1,2}/.test(raw)) {
+    const parts = raw.split(/[-\/]/);
+    const yyyy = parseInt(parts[0], 10);
+    const mm = parseInt(parts[1], 10);
+    const dd = parseInt(parts[2], 10);
+    d = new Date(yyyy, mm - 1, dd);
+  }
+  // ── Timestamp (ms) ──
+  else if (/^\d{13}$/.test(raw)) {
+    d = new Date(parseInt(raw, 10));
+  }
+  else {
     d = new Date(raw);
   }
-  if (isNaN(d)) return raw;
-  const dd = String(d.getDate()).padStart(2,'0');
-  const mm = String(d.getMonth()+1).padStart(2,'0');
+
+  if (isNaN(d) || d.getFullYear() < 1900) return raw;
+
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
   const yyyy = d.getFullYear();
-  return `${dd}/${mm}/${yyyy}`;
+  return dd + '/' + mm + '/' + yyyy;
 }
 
-// ── ĐIỀN DỮ LIỆU HEADER ──
-const soHD    = q('so')      || q('sohd')   || '_______________';
-const ngay    = q('ngay')    || q('date')    || '';
-const benNhan = q('bennhan') || q('khach')   || '_______________';
-const nguoiLap= q('nguoilap')|| '';
-const taixe   = q('taixe')   || '';
-const bsx     = q('bsx')     || '';
-const dtNhan  = q('dtnhan')  || '';
-const dtTaixe = q('dttaixe') || '';
+// ── ĐIỀN DỮ LIỆU ──
+const soHD     = q('so')      || q('sohd')   || '_______________';
+const ngay     = q('ngay')    || q('date')    || '';
+const benNhan  = q('bennhan') || q('khach')   || '_______________';
+const nguoiLap = q('nguoilap')|| '';
+const taixe    = q('taixe')   || '';
+const bsx      = q('bsx')     || '';
+const dtNhan   = q('dtnhan')  || '';
+const dtTaixe  = q('dttaixe') || '';
 
-set('el-sohd',   soHD);
+set('el-sohd',    soHD);
 set('el-bennhan', benNhan);
-//set('sig-nguoilap', nguoiLap);
 if (taixe)   set('el-taixe',   taixe);
 if (bsx)     set('el-bsx',     bsx);
 if (dtNhan)  set('el-dt-nhan', dtNhan);
 if (dtTaixe) set('el-dt-taixe', dtTaixe);
 
 const ngayFmt = formatDate(ngay);
-if (ngayFmt) set('el-day', ngayFmt);
-else document.getElementById('el-day').textContent = '___/___/______';
+if (ngayFmt) {
+  set('el-day', ngayFmt);
+} else {
+  document.getElementById('el-day').textContent = '___/___/______';
+}
 
-// ── ĐIỀN BẢNG HÀNG HÓA ──
+// ── BẢNG HÀNG HÓA ──
 const rawItems = q('items');
 const tbody = document.getElementById('table-body');
-
 let tongSL = 0;
 
 if (rawItems) {
   const rows = rawItems.replace(/,(\s*\|\|)/g, '$1').split('||');
 
-  rows.forEach((row) => {
+  rows.forEach(function(row) {
     let cleanRow = row.trim();
     if (!cleanRow || cleanRow === ',') return;
     if (cleanRow.startsWith(',')) cleanRow = cleanRow.substring(1);
 
     const cols = cleanRow.split('|');
-    if (cols.length < 7) return; 
+    if (cols.length < 7) return;
 
-    const [lsx='', muc='', masp='', ten='', dvt='', sl='', po='', ghichu=''] = cols;
+    const lsx    = cols[0] || '';
+    const muc    = cols[1] || '';
+    const masp   = cols[2] || '';
+    const ten    = cols[3] || '';
+    const dvt    = cols[4] || '';
+    const sl     = cols[5] || '';
+    const po     = cols[6] || '';
+    const ghichu = cols[7] || '';
+
     const slVal = parseFloat(sl) || 0;
     tongSL += slVal;
 
     const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="stt">${muc}</td>
-      <td class="lsx">${lsx}</td>
-      <td class="po">${po}</td>
-      <td class="masp">${masp}</td>
-      <td class="ten">${ten}</td>
-      <td class="dvt">${dvt}</td>
-      <td class="sl">${sl}</td>
-      <td class="ghichu">${ghichu}</td>
-    `;
+    tr.innerHTML =
+      '<td class="stt">'    + muc    + '</td>' +
+      '<td class="lsx">'    + lsx    + '</td>' +
+      '<td class="po">'     + po     + '</td>' +
+      '<td class="masp">'   + masp   + '</td>' +
+      '<td class="ten">'    + ten    + '</td>' +
+      '<td class="dvt">'    + dvt    + '</td>' +
+      '<td class="sl">'     + sl     + '</td>' +
+      '<td class="ghichu">' + ghichu + '</td>';
     tbody.appendChild(tr);
   });
 } else {
-  const demo = [
+  var demo = [
     ['TBNN.15/06', '1', 'CKM7-4', 'Bulong 12x50 ren 40 mạ đen', 'CT', 100, 'BBGH02072026-AD2-001', 'Kết cấu kệ kho mát 2 - XĐG chuối LP3, LP1, BP2'],
     ['TBNN.15/06', '2', 'CKM7-4', 'Bulong 12x50 ren 40 mạ đen', 'CT', 1, 'BBGH02072026-AD2-001', 'Kết cấu kệ kho mát 2 - XĐG chuối LP3, LP1, BP2'],
   ];
-  demo.forEach((d) => {
+  demo.forEach(function(d) {
     tongSL += d[5];
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="stt">${d[1]}</td>
-      <td class="lsx">${d[0]}</td>
-      <td class="po">${d[6]}</td>
-      <td class="masp">${d[2]}</td>
-      <td class="ten">${d[3]}</td>
-      <td class="dvt">${d[4]}</td>
-      <td class="sl">${d[5]}</td>
-      <td class="ghichu">${d[7]}</td>
-    `;
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td class="stt">'    + d[1] + '</td>' +
+      '<td class="lsx">'    + d[0] + '</td>' +
+      '<td class="po">'     + d[6] + '</td>' +
+      '<td class="masp">'   + d[2] + '</td>' +
+      '<td class="ten">'    + d[3] + '</td>' +
+      '<td class="dvt">'    + d[4] + '</td>' +
+      '<td class="sl">'     + d[5] + '</td>' +
+      '<td class="ghichu">' + d[7] + '</td>';
     tbody.appendChild(tr);
   });
 }
 
 document.getElementById('tong-sl').textContent = tongSL || '';
 
-// ── TỰ ĐỘNG GỘP Ô TRÙNG NHAU ──
+// ── GỘP Ô TRÙNG ──
 autoMergeTableCells();
 
 function autoMergeTableCells() {
-  const tableRows = tbody.getElementsByTagName('tr');
+  var tableRows = tbody.getElementsByTagName('tr');
   if (tableRows.length <= 1) return;
 
-  const targetCols = [1, 2, 7];
+  var targetCols = [1, 2, 7];
 
-  targetCols.forEach((colIdx) => {
-    let anchorCell = null;
-    let spanCount = 1;
+  targetCols.forEach(function(colIdx) {
+    var anchorCell = null;
+    var spanCount = 1;
 
-    for (let i = 0; i < tableRows.length; i++) {
-      const currentCell = tableRows[i].cells[colIdx];
+    for (var i = 0; i < tableRows.length; i++) {
+      var currentCell = tableRows[i].cells[colIdx];
       if (!currentCell) continue;
 
       if (anchorCell === null) {
         anchorCell = currentCell;
         spanCount = 1;
-      } else if (currentCell.textContent.trim() === anchorCell.textContent.trim() && anchorCell.textContent.trim() !== '') {
+      } else if (
+        currentCell.textContent.trim() === anchorCell.textContent.trim() &&
+        anchorCell.textContent.trim() !== ''
+      ) {
         spanCount++;
         anchorCell.rowSpan = spanCount;
         currentCell.style.display = 'none';
