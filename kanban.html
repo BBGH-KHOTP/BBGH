@@ -252,7 +252,177 @@
                     <td colspan="2" class="value-highlight left-align" id="cell-po-kh">KH/10/06 Lô 9</td>
                     <td colspan="2" class="value-highlight" id="cell-donvi">Bus</td>
                 </tr>
-                <!-- Row 3 -->
+                <!-- Row 3 --><!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>In Nhãn QR Code</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        /* --- NÚT CHỌN KHỔ GIẤY --- */
+        .controls {
+            background: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 20px;
+        }
+        .btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-40x60 { background-color: #007bff; }
+        .btn-40x60:hover { background-color: #0056b3; }
+        .btn-60x80 { background-color: #dc3545; }
+        .btn-60x80:hover { background-color: #a71d2a; }
+
+        /* --- KHUNG NHÃN MẶC ĐỊNH TRÊN MÀN HÌNH --- */
+        #print-area {
+            background: white;
+            width: 60mm; 
+            height: 80mm;
+            box-sizing: border-box;
+            border: 1px dashed #ccc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; 
+            padding: 2mm;
+            text-align: center;
+        }
+
+        /* QR Code */
+        .qr-code {
+            width: 40mm;
+            height: 40mm;
+            border: 1px solid red; /* Giữ viền đỏ như hình */
+            image-rendering: pixelated; 
+        }
+
+        /* Phần chữ bên dưới */
+        .text-container {
+            margin-top: 2mm;
+            width: 100%;
+            font-size: 10px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+        .text-line {
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis; /* Cắt chữ bằng ... nếu quá dài */
+            border-bottom: 1px dotted #ccc; /* Thêm đường chấm nhẹ giữa các dòng cho dễ nhìn (có thể xóa nếu không thích) */
+            padding: 1px 0;
+        }
+        .text-line:last-child {
+            border-bottom: none;
+        }
+
+        /* --- CẤU HÌNH KHI IN --- */
+        @media print {
+            body { background: none; padding: 0; }
+            .controls { display: none !important; }
+            body * { visibility: hidden; }
+            #print-area, #print-area * { visibility: visible; }
+            #print-area { 
+                position: absolute; left: 0; top: 0; 
+                border: none !important; 
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <button class="btn btn-40x60" onclick="preparePrint('40mm', '60mm')">
+            🖨️ In 40x60mm
+        </button>
+        <button class="btn btn-60x80" onclick="preparePrint('60mm', '80mm')">
+            🖨️ In 60x80mm
+        </button>
+    </div>
+
+    <!-- PHẦN NỘI DUNG NHÃN -->
+    <div id="print-area">
+        <!-- 1. Khối Mã QR -->
+        <img src="<<MÃ QR>>" alt="QR Code" class="qr-code" id="qr-img">
+
+        <!-- 2. Khối chữ bên dưới (Đã sửa lại dòng 1) -->
+        <div class="text-container">
+            <div class="text-line"><<Mục>> | <<Mã CT>> | <<Tên CT>></div>
+            <div class="text-line"><<Đơn vị đặt>></div>
+            <div class="text-line"><<Số PO>></div>
+            <div class="text-line"><<Tên đơn hàng>></div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT XỬ LÝ CHUYỂN ĐỔI KHỔ GIẤY -->
+    <script>
+        function preparePrint(height, width) {
+            
+            let dynamicStyle = document.getElementById('dynamic-print-css');
+            if (!dynamicStyle) {
+                dynamicStyle = document.createElement('style');
+                dynamicStyle.id = 'dynamic-print-css';
+                document.head.appendChild(dynamicStyle);
+            }
+
+            // Tính toán kích thước QR và Chữ
+            let qrSize, fontSize;
+            if (height === '40mm') {
+                qrSize = '25mm'; 
+                fontSize = '6.5px'; // Chỉnh hơi nhỏ một chút cho 40x60 vì dòng 1 nay dài hơn
+            } else {
+                qrSize = '40mm'; 
+                fontSize = '9px'; 
+            }
+
+            // Đưa cấu hình vào CSS @page
+            dynamicStyle.textContent = `
+                @media print {
+                    @page {
+                        size: ${width} ${height}; 
+                        margin: 0mm; 
+                    }
+                    #print-area {
+                        width: ${width};
+                        height: ${height};
+                    }
+                    #qr-img {
+                        width: ${qrSize};
+                        height: ${qrSize};
+                    }
+                    .text-container {
+                        font-size: ${fontSize};
+                    }
+                }
+            `;
+
+            setTimeout(() => {
+                window.print();
+            }, 200);
+        }
+    </script>
+</body>
+</html>
                 <tr>
                     <td class="label-title">TÊN CHI TIẾT</td>
                     <td class="value-highlight" colspan="2" id="cell-ten-ct">CÀNG QUAY CỬA 01</td>
