@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>In Tem Kanban</title>
+    <style>
+        /* CSS reset & base variables */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Control Panel Styles (Hidden during printing) */
+        .control-panel {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 20px;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .control-panel h2 {
+            font-size: 18px;
+            color: #1a73e8;
+            margin-bottom: 15px;
+        }
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .btn {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        }
+        .btn:hover {
+            background-color: #1557b0;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .btn-secondary {
+            background-color: #34a853;
+        }
+        .btn-secondary:hover {
+            background-color: #2d8c47;
+        }
+        .tip-text {
+            font-size: 13px;
+            color: #666;
+            margin-top: 10px;
+            line-height: 1.4;
+        }
+
+        /* Label Container Preview */
+        .label-preview-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+            overflow-x: auto;
+        }
+
+        /* Standard Kanban Table Design */
+        .kanban-label {
+            background-color: #fff;
+            border: 2px solid #000;
+            color: #000;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+            text-transform: uppercase;
+            overflow: hidden;
+            display: block;
+        }
+
+        /* Size classes for Screen Preview */
+        .size-40-60 {
+            width: 60mm;
+            height: 40mm;
+            padding: 1mm;
+        }
+        .size-60-80 {
+            width: 80mm;
+            height: 60mm;
+            padding: 2mm;
+        }
+
+        /* Label Table Grid */
+        .kanban-table {
+            width: 100%;
+            height: 100%;
+            border-collapse: collapse;
+            border: 1.5px solid #000;
+            table-layout: fixed;
+        }
+        .kanban-table td {
+            border: 1px solid #000;
+            padding: 2px;
+            text-align: center;
+            vertical-align: middle;
+            word-wrap: break-word;
+            overflow: hidden;
+        }
+
+        /* Typography sizing for dense label printing */
+        .size-40-60 .kanban-table {
+            font-size: 6.5px;
+        }
+        .size-60-80 .kanban-table {
+            font-size: 9.5px;
+        }
+
+        /* Specific Header Sizing */
+        .label-title {
+            font-weight: 900;
+        }
+        .size-40-60 .label-title { font-size: 6px; }
+        .size-60-80 .label-title { font-size: 9px; }
+
+        .value-highlight {
+            font-weight: 900;
+            color: #000;
+        }
+        .size-40-60 .value-highlight { font-size: 7.5px; }
+        .size-60-80 .value-highlight { font-size: 11px; }
+
+        /* Left aligned sub-tables inside grid */
+        .left-align {
+            text-align: left !important;
+            padding-left: 4px !important;
+        }
+
+        /* QR Code Styling */
+        .qr-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+        }
+        .qr-image {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+
+        /* PRINT STYLING */
+        @media print {
+            body {
+                background-color: #fff;
+                padding: 0;
+                margin: 0;
+                display: block;
+            }
+            .control-panel {
+                display: none !important;
+            }
+            .label-preview-container {
+                box-shadow: none;
+                padding: 0;
+                margin: 0;
+                background-color: transparent;
+                display: block;
+            }
+            .kanban-label {
+                border: none;
+                margin: 0;
+                page-break-inside: avoid;
+                page-break-after: avoid;
+            }
+        }
+
+        /* Dynamic style block injected by Javascript for changing page orientation on the fly */
+        @property --print-size {
+            syntax: '<string>';
+            inherits: false;
+            initial-value: '60mm 40mm';
+        }
+    </style>
+    
+    <!-- Dynamic CSS sheet for print margin setting -->
+    <style id="print-settings">
+        @page {
+            size: 60mm 40mm; /* default 40x60mm (height x width -> CSS is width height) */
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Control panel for printing options -->
+    <div class="control-panel">
+        <h2>CẤU HÌNH VÀ IN TEM KANBAN</h2>
+        <p style="margin-bottom: 15px; font-size: 14px; color: #555;">Chọn khổ giấy bên dưới để tự động căn chỉnh và gửi lệnh in đến máy in.</p>
+        
+        <div class="btn-group">
+            <button class="btn" onclick="printLabel('40x60')">🖨️ In Khổ 40x60 mm (Cao x Rộng)</button>
+            <button class="btn btn-secondary" onclick="printLabel('60x80')">🖨️ In Khổ 60x80 mm (Cao x Rộng)</button>
+        </div>
+        
+        <div class="tip-text">
+            <strong>Mẹo in:</strong> Khi hộp thoại in của trình duyệt hiện ra, hãy chọn đúng máy in nhãn, đặt khổ giấy tương ứng (40x60mm hoặc 60x80mm) và đặt <strong>Lề (Margins) = None/Không có</strong> để đạt kết quả đẹp nhất.
+        </div>
+    </div>
+
+    <!-- Live Preview Label Sheet -->
+    <div class="label-preview-container">
+        <!-- Default to 40x60 preview. Appsheet can populate these spans/cells. -->
+        <div id="kanbanLabel" class="kanban-label size-40-60">
+            <table class="kanban-table">
+                <!-- Row 1 -->
+                <tr>
+                    <td class="label-title" style="width: 25%;">LỆNH SẢN XUẤT</td>
+                    <td class="value-highlight" style="width: 23%;" id="cell-lsx">BUS.88/07</td>
+                    <td colspan="4" class="value-highlight left-align" style="width: 52%; font-size: 0.9em;" id="cell-ten-dh">
+                        BLK Chuyền trim Co2 TB120B24C-01 (4 xe) + TB120B22RC-01 (2 xe) LÔ 9
+                    </td>
+                </tr>
+                <!-- Row 2 -->
+                <tr>
+                    <td class="label-title">MÃ CHI TIẾT</td>
+                    <td class="value-highlight" id="cell-ma-ct">7000043I1</td>
+                    <td colspan="2" class="value-highlight left-align" id="cell-po-kh">KH/10/06 Lô 9</td>
+                    <td colspan="2" class="value-highlight" id="cell-donvi">Bus</td>
+                </tr>
+                <!-- Row 3 -->
+                <tr>
+                    <td class="label-title">TÊN CHI TIẾT</td>
+                    <td class="value-highlight" colspan="2" id="cell-ten-ct">CÀNG QUAY CỬA 01</td>
+                    <td class="label-title" style="width: 15%;">NGÀY HT</td>
+                    <td colspan="2" class="value-highlight" id="cell-ngay-ht">10/7</td>
+                </tr>
+                <!-- Row 4 -->
+                <tr>
+                    <td class="label-title">VẬT LIỆU</td>
+                    <td class="value-highlight" colspan="2" id="cell-vat-lieu">SS400</td>
+                    <td class="label-title">SỐ HEAT/LOT</td>
+                    <td colspan="2" class="value-highlight" id="cell-heat-lot"></td>
+                </tr>
+                <!-- Row 5 -->
+                <tr>
+                    <td class="label-title">STT CHI TIẾT</td>
+                    <td class="value-highlight" id="cell-stt-ct">20</td>
+                    <td class="label-title" style="width: 20%;">HÌNH/ HỘP</td>
+                    <td class="value-highlight" id="cell-hinh-hop"></td>
+                    <td class="label-title" style="width: 10%;">DÀI</td>
+                    <td class="value-highlight" style="width: 15%;" id="cell-dai">394</td>
+                </tr>
+                <!-- Row 6 -->
+                <tr>
+                    <td class="label-title">SỐ LƯỢNG</td>
+                    <td class="value-highlight" id="cell-so-luong">6</td>
+                    <td class="value-highlight" id="cell-nc6">Ø34</td>
+                    <td class="label-title">RỘNG</td>
+                    <td class="value-highlight" id="cell-rong"></td>
+                    <td class="label-title" style="width: 10%;">DÀY</td>
+                    <td class="value-highlight" style="width: 15%;" id="cell-day">3</td>
+                </tr>
+                
+                <!-- Inner Steps & QR Grid -->
+                <!-- Row 1 of Steps -->
+                <tr>
+                    <td class="label-title" style="width: 5%;">1</td>
+                    <td class="left-align" id="cell-nc1">LS ống/TH</td>
+                    <td class="value-highlight" id="cell-nc1-val">6</td>
+                    <td class="label-title" style="width: 5%;">11</td>
+                    <td id="cell-nc11"></td>
+                    <td class="label-title" style="width: 10%;">Dn/Dt</td>
+                    <td class="value-highlight" style="width: 15%;" id="cell-dndt">/</td>
+                </tr>
+                <!-- Row 2 of Steps -->
+                <tr>
+                    <td class="label-title">2</td>
+                    <td class="left-align" id="cell-nc2">Kho THCK</td>
+                    <td class="value-highlight" id="cell-nc2-val">7</td>
+                    <td class="label-title">12</td>
+                    <td id="cell-nc12"></td>
+                    <td colspan="2" rowspan="4" style="padding: 0;">
+                        <div class="qr-container">
+                            <!-- Placeholder QR. AppSheet can pass actual QR URL / base64 or you can generate via dynamic API -->
+                            <img class="qr-image" id="cell-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=7000043I1" alt="QR Code">
+                        </div>
+                    </td>
+                </tr>
+                <!-- Row 3 of Steps -->
+                <tr>
+                    <td class="label-title">3</td>
+                    <td class="left-align" id="cell-nc3"></td>
+                    <td class="value-highlight" id="cell-nc3-val">8</td>
+                    <td class="label-title">13</td>
+                    <td id="cell-nc13"></td>
+                </tr>
+                <!-- Row 4 of Steps -->
+                <tr>
+                    <td class="label-title">4</td>
+                    <td class="left-align" id="cell-nc4"></td>
+                    <td class="value-highlight" id="cell-nc4-val">9</td>
+                    <td class="label-title">14</td>
+                    <td id="cell-nc14"></td>
+                </tr>
+                <!-- Row 5 of Steps -->
+                <tr>
+                    <td class="label-title">5</td>
+                    <td class="left-align" id="cell-nc5"></td>
+                    <td class="value-highlight" id="cell-nc5-val">10</td>
+                    <td class="label-title">15</td>
+                    <td id="cell-nc15"></td>
+                </tr>
+                
+                <!-- Bottom Row -->
+                <tr>
+                    <td class="label-title" colspan="2">Ghi chú</td>
+                    <td colspan="3" id="cell-ghi-chu"></td>
+                    <td class="label-title" style="font-size: 0.9em;">Máy GC</td>
+                    <td id="cell-may-gc" style="font-size: 0.9em;"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Parse URL Query parameters to dynamically populate values sent by AppSheet/Google Sheets
+        function populateFromQueryParams() {
+            const params = new URLSearchParams(window.location.search);
+            
+            // Map parameters to IDs
+            const fieldMap = {
+                'lsx': 'cell-lsx',
+                'ten_dh': 'cell-ten-dh',
+                'ma_ct': 'cell-ma-ct',
+                'po_kh': 'cell-po-kh',
+                'donvi': 'cell-donvi',
+                'ten_ct': 'cell-ten-ct',
+                'ngay_ht': 'cell-ngay-ht',
+                'vat_lieu': 'cell-vat-lieu',
+                'heat_lot': 'cell-heat-lot',
+                'stt_ct': 'cell-stt-ct',
+                'hinh_hop': 'cell-hinh-hop',
+                'dai': 'cell-dai',
+                'so_luong': 'cell-so-luong',
+                'nc6': 'cell-nc6',
+                'rong': 'cell-rong',
+                'day': 'cell-day',
+                'dndt': 'cell-dndt',
+                'nc1': 'cell-nc1',
+                'nc1_val': 'cell-nc1-val',
+                'nc11': 'cell-nc11',
+                'nc2': 'cell-nc2',
+                'nc2_val': 'cell-nc2-val',
+                'nc12': 'cell-nc12',
+                'nc3': 'cell-nc3',
+                'nc3_val': 'cell-nc3-val',
+                'nc13': 'cell-nc13',
+                'nc4': 'cell-nc4',
+                'nc4_val': 'cell-nc4-val',
+                'nc14': 'cell-nc14',
+                'nc5': 'cell-nc5',
+                'nc5_val': 'cell-nc5-val',
+                'nc15': 'cell-nc15',
+                'ghi_chu': 'cell-ghi-chu',
+                'may_gc': 'cell-may-gc'
+            };
+
+            for (const [paramKey, elementId] of Object.entries(fieldMap)) {
+                if (params.has(paramKey)) {
+                    document.getElementById(elementId).innerText = params.get(paramKey);
+                }
+            }
+
+            // QR Code generation based on QR data param or MA_CT param
+            let qrData = params.get('qr_data') || params.get('ma_ct') || "7000043I1";
+            if (qrData) {
+                document.getElementById('cell-qr').src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + encodeURIComponent(qrData);
+            }
+        }
+
+        // Handle print setup dynamically
+        function printLabel(size) {
+            const labelEl = document.getElementById('kanbanLabel');
+            const styleEl = document.getElementById('print-settings');
+            
+            if (size === '40x60') {
+                // Height 40mm x Width 60mm
+                styleEl.innerHTML = `@page { size: 60mm 40mm; margin: 0; }`;
+                labelEl.className = "kanban-label size-40-60";
+            } else if (size === '60x80') {
+                // Height 60mm x Width 80mm
+                styleEl.innerHTML = `@page { size: 80mm 60mm; margin: 0; }`;
+                labelEl.className = "kanban-label size-60-80";
+            }
+            
+            // Allow DOM to update style classes, then trigger print dialog
+            setTimeout(() => {
+                window.print();
+            }, 100);
+        }
+
+        // Initialize values
+        window.onload = populateFromQueryParams;
+    </script>
+</body>
+</html>
