@@ -223,49 +223,45 @@
 
   .field-label { font-weight: bold; white-space: nowrap; }
 
-  /* ── Ô điền trống: xám nhạt + gạch chân ── */
+  /* ── Placeholder: chỉ chấm xám mờ, không gạch chân, không khung ── */
   .field-value {
-    border-bottom: 1px solid #bbb;
+    border-bottom: none;
     min-width: 35mm;
     display: inline-block;
     padding: 0 1mm;
     min-height: 1.2em;
-    color: #b0b0b0;
+    color: #c0c0c0;
     font-style: italic;
     letter-spacing: 1.5px;
   }
 
-  /* ── Khi có dữ liệu thật: đen, bình thường ── */
+  /* ── Khi có dữ liệu thật ── */
   .field-value.filled {
     color: #000;
     font-style: normal;
     letter-spacing: normal;
-    border-bottom-color: #000;
   }
 
   .field-value.short  { min-width: 25mm; }
   .field-value.xshort { min-width: 18mm; }
   .field-value.xlong  { min-width: 55mm; }
 
+  /* ── Phần C: không khung, không nền ── */
   .vc-section {
     margin-top: 1.5mm;
-    padding: 1.5mm 2mm;
-    border: 1px solid #999;
-    border-radius: 2px;
-    background: #fafafa;
   }
 
   .vc-section .vc-title {
     font-weight: bold;
     font-size: 9.5pt;
-    margin-bottom: 1mm;
+    margin-bottom: 0.5mm;
   }
 
   .vc-row {
     display: flex;
     gap: 6mm;
     flex-wrap: wrap;
-    margin-bottom: 0.5mm;
+    margin-bottom: 0.3mm;
   }
 
   .vc-row:last-child { margin-bottom: 0; }
@@ -422,7 +418,7 @@
   <div class="doc-title">
     <h1>Biên Bản Giao Nhận Hàng</h1>
   </div>
-  <div class="doc-date-place" id="el-dateplace">Chu Lai, ngày <span id="el-day">......./......./........</span></div>
+  <div class="doc-date-place" id="el-dateplace">Chu Lai, ngày <span id="el-day" style="color:#c0c0c0;font-style:italic;letter-spacing:1.5px;">......./......./........</span></div>
   <div class="doc-so">SỐ: <span class="field-value filled" id="el-sohd">............</span></div>
 </div>
 
@@ -434,14 +430,14 @@
     <div><span class="field-label">Điện thoại: </span><span class="field-value" id="el-dt-giao">..........</span></div>
   </div>
 
-  <div style="margin-top:1.5mm"><span class="party-title">B. BÊN NHẬN: </span><span id="el-bennhan" style="font-weight:bold;">............</span></div>
+  <div style="margin-top:1.5mm"><span class="party-title">B. BÊN NHẬN: </span><span id="el-bennhan" style="font-weight:bold;color:#c0c0c0;font-style:italic;letter-spacing:1.5px;">............</span></div>
   <div class="party-row"><span>Địa chỉ:</span><span id="el-diachi-nhan">KCN Cơ khí Ô tô Chu Lai Trường Hải - Xã Núi Thành - Thành Phố Đà Nẵng</span></div>
   <div class="inline-fields">
     <div><span class="field-label">Đại diện: </span><span class="field-value xlong" id="el-daidien-nhan">...............</span></div>
     <div><span class="field-label">Điện thoại: </span><span class="field-value" id="el-dt-nhan">..........</span></div>
   </div>
 
-  <!-- ═══ PHẦN C: THÔNG TIN VẬN CHUYỂN ═══ -->
+  <!-- ═══ PHẦN C: THÔNG TIN VẬN CHUYỂN — không khung ═══ -->
   <div class="vc-section">
     <div class="vc-title">C. THÔNG TIN VẬN CHUYỂN:</div>
     <div class="vc-row">
@@ -550,8 +546,7 @@ var urlParams = new URLSearchParams(window.location.search);
 function q(name) { return urlParams.get(name) || ''; }
 
 /**
- * Điền dữ liệu vào ô — tự thêm class .filled khi có giá trị
- * Khi không có giá trị, ô giữ nguyên "......." xám nhạt
+ * Điền dữ liệu — có giá trị thì đen bình thường, không thì giữ "......." xám mờ
  */
 function fill(id, val) {
   var el = document.getElementById(id);
@@ -560,7 +555,6 @@ function fill(id, val) {
     el.textContent = val.trim();
     el.classList.add('filled');
   }
-  // else: giữ nguyên placeholder "......." xám
 }
 
 function looksLikeDate(val) {
@@ -662,7 +656,7 @@ function findDate() {
 })();
 
 // ═══════════════════════════════════════════════════════════
-// ĐIỀN DỮ LIỆU — chỉ điền khi có giá trị, giữ "......." xám nếu trống
+// ĐIỀN DỮ LIỆU
 // ═══════════════════════════════════════════════════════════
 var soHD    = q('so') || q('sohd') || q('So') || q('SOHD') || '';
 var benNhan = q('bennhan') || q('khach') || q('tennhan') || '';
