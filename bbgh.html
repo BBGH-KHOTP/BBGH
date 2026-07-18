@@ -221,30 +221,31 @@
     flex-wrap: wrap;
   }
 
-  .inline-fields-4 {
-    display: grid;
-    grid-template-columns: auto 1fr auto 1fr;
-    gap: 2mm 6mm;
-    align-items: baseline;
-  }
-
   .field-label { font-weight: bold; white-space: nowrap; }
 
+  /* ── Ô điền trống: xám nhạt + gạch chân ── */
   .field-value {
-    border-bottom: 1px solid #000;
+    border-bottom: 1px solid #bbb;
     min-width: 35mm;
     display: inline-block;
     padding: 0 1mm;
     min-height: 1.2em;
+    color: #b0b0b0;
+    font-style: italic;
+    letter-spacing: 1.5px;
   }
 
-  .field-value.short {
-    min-width: 25mm;
+  /* ── Khi có dữ liệu thật: đen, bình thường ── */
+  .field-value.filled {
+    color: #000;
+    font-style: normal;
+    letter-spacing: normal;
+    border-bottom-color: #000;
   }
 
-  .field-value.xshort {
-    min-width: 18mm;
-  }
+  .field-value.short  { min-width: 25mm; }
+  .field-value.xshort { min-width: 18mm; }
+  .field-value.xlong  { min-width: 55mm; }
 
   .vc-section {
     margin-top: 1.5mm;
@@ -267,9 +268,7 @@
     margin-bottom: 0.5mm;
   }
 
-  .vc-row:last-child {
-    margin-bottom: 0;
-  }
+  .vc-row:last-child { margin-bottom: 0; }
 
   .vc-item {
     display: flex;
@@ -277,18 +276,9 @@
     gap: 1.5mm;
   }
 
-  .vc-item .field-label {
-    font-size: 9pt;
-  }
-
-  .vc-item .field-value {
-    font-size: 9pt;
-    min-width: 30mm;
-  }
-
-  .vc-item .field-value.xshort {
-    min-width: 20mm;
-  }
+  .vc-item .field-label { font-size: 9pt; }
+  .vc-item .field-value { font-size: 9pt; min-width: 30mm; }
+  .vc-item .field-value.xshort { min-width: 20mm; }
 
   .intro {
     margin: 2mm 0;
@@ -409,7 +399,7 @@
 <button class="btn-debug no-print" id="btnDebug" onclick="toggleDebug()">🔧 Debug URL</button>
 
 <div class="debug-panel" id="debugPanel">
-  <div class="dbg-title">📋 Tham số từ hệ thống - Auto sửa lỗi Tuấnns</div>
+  <div class="dbg-title">📋 Tham số từ hệ thống</div>
   <div id="debugContent"></div>
 </div>
 
@@ -432,23 +422,23 @@
   <div class="doc-title">
     <h1>Biên Bản Giao Nhận Hàng</h1>
   </div>
-  <div class="doc-date-place" id="el-dateplace">Chu Lai, ngày <span id="el-day"></span></div>
-  <div class="doc-so">SỐ: <span id="el-sohd"></span></div>
+  <div class="doc-date-place" id="el-dateplace">Chu Lai, ngày <span id="el-day">......./......./........</span></div>
+  <div class="doc-so">SỐ: <span class="field-value filled" id="el-sohd">............</span></div>
 </div>
 
 <div class="parties">
   <div><span class="party-title">A. BÊN GIAO: </span><span id="el-bengiao" style="font-weight:bold;">CÔNG TY TNHH TỔ HỢP CƠ KHÍ THACO</span></div>
   <div class="party-row"><span>Địa chỉ:</span><span id="el-diachi-giao">KCN Cơ khí Ô tô Chu Lai Trường Hải - Xã Núi Thành - Thành Phố Đà Nẵng</span></div>
   <div class="inline-fields">
-    <div><span class="field-label">Đại diện: </span><span class="field-value" id="el-daidien-giao">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-    <div><span class="field-label">Điện thoại: </span><span class="field-value" id="el-dt-giao">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+    <div><span class="field-label">Đại diện: </span><span class="field-value xlong" id="el-daidien-giao">...............</span></div>
+    <div><span class="field-label">Điện thoại: </span><span class="field-value" id="el-dt-giao">..........</span></div>
   </div>
 
-  <div style="margin-top:1.5mm"><span class="party-title">B. BÊN NHẬN: </span><span id="el-bennhan" style="font-weight:bold;"></span></div>
+  <div style="margin-top:1.5mm"><span class="party-title">B. BÊN NHẬN: </span><span id="el-bennhan" style="font-weight:bold;">............</span></div>
   <div class="party-row"><span>Địa chỉ:</span><span id="el-diachi-nhan">KCN Cơ khí Ô tô Chu Lai Trường Hải - Xã Núi Thành - Thành Phố Đà Nẵng</span></div>
   <div class="inline-fields">
-    <div><span class="field-label">Đại diện: </span><span class="field-value" id="el-daidien-nhan">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-    <div><span class="field-label">Điện thoại: </span><span class="field-value" id="el-dt-nhan">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+    <div><span class="field-label">Đại diện: </span><span class="field-value xlong" id="el-daidien-nhan">...............</span></div>
+    <div><span class="field-label">Điện thoại: </span><span class="field-value" id="el-dt-nhan">..........</span></div>
   </div>
 
   <!-- ═══ PHẦN C: THÔNG TIN VẬN CHUYỂN ═══ -->
@@ -457,25 +447,25 @@
     <div class="vc-row">
       <div class="vc-item">
         <span class="field-label">Tên tài xế:</span>
-        <span class="field-value" id="el-taixe">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        <span class="field-value" id="el-taixe">...............</span>
       </div>
       <div class="vc-item">
         <span class="field-label">Điện thoại:</span>
-        <span class="field-value short" id="el-dt-taixe">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        <span class="field-value short" id="el-dt-taixe">..........</span>
       </div>
     </div>
     <div class="vc-row">
       <div class="vc-item">
         <span class="field-label">BSX:</span>
-        <span class="field-value short" id="el-bsx">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        <span class="field-value short" id="el-bsx">............</span>
       </div>
       <div class="vc-item">
         <span class="field-label">Số chuyến:</span>
-        <span class="field-value xshort" id="el-sochuyen">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        <span class="field-value xshort" id="el-sochuyen">........</span>
       </div>
       <div class="vc-item">
         <span class="field-label">Số kệ:</span>
-        <span class="field-value xshort" id="el-soke">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        <span class="field-value xshort" id="el-soke">........</span>
       </div>
     </div>
   </div>
@@ -558,7 +548,20 @@ function toggleDebug() {
 
 var urlParams = new URLSearchParams(window.location.search);
 function q(name) { return urlParams.get(name) || ''; }
-function set(id, val) { var el = document.getElementById(id); if (el && val) el.textContent = val; }
+
+/**
+ * Điền dữ liệu vào ô — tự thêm class .filled khi có giá trị
+ * Khi không có giá trị, ô giữ nguyên "......." xám nhạt
+ */
+function fill(id, val) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  if (val && val.trim()) {
+    el.textContent = val.trim();
+    el.classList.add('filled');
+  }
+  // else: giữ nguyên placeholder "......." xám
+}
 
 function looksLikeDate(val) {
   if (!val) return false;
@@ -566,7 +569,7 @@ function looksLikeDate(val) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// FORMAT NGÀY — TỰ ĐỘNG NHẬN DIỆN DD/MM vs MM/DD
+// FORMAT NGÀY
 // ═══════════════════════════════════════════════════════════
 var _lastSwap = false;
 
@@ -578,8 +581,7 @@ function formatDate(raw) {
 
   if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
     var p = s.split('/');
-    var a = parseInt(p[0], 10);
-    var b = parseInt(p[1], 10);
+    var a = parseInt(p[0], 10), b = parseInt(p[1], 10);
     yyyy = parseInt(p[2], 10);
     if (b > 12) { mm = a; dd = b; _lastSwap = true; }
     else if (a > 12 && b <= 12) { mm = a; dd = b; _lastSwap = true; }
@@ -587,8 +589,7 @@ function formatDate(raw) {
   }
   else if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(s)) {
     var p = s.split('-');
-    var a = parseInt(p[0], 10);
-    var b = parseInt(p[1], 10);
+    var a = parseInt(p[0], 10), b = parseInt(p[1], 10);
     yyyy = parseInt(p[2], 10);
     if (b > 12) { mm = a; dd = b; _lastSwap = true; }
     else if (a > 12 && b <= 12) { mm = a; dd = b; _lastSwap = true; }
@@ -661,33 +662,35 @@ function findDate() {
 })();
 
 // ═══════════════════════════════════════════════════════════
-// ĐIỀN DỮ LIỆU
+// ĐIỀN DỮ LIỆU — chỉ điền khi có giá trị, giữ "......." xám nếu trống
 // ═══════════════════════════════════════════════════════════
-var soHD    = q('so') || q('sohd') || q('So') || q('SOHD') || '_______________';
-var benNhan = q('bennhan') || q('khach') || q('tennhan') || '_______________';
+var soHD    = q('so') || q('sohd') || q('So') || q('SOHD') || '';
+var benNhan = q('bennhan') || q('khach') || q('tennhan') || '';
 
-// Thông tin vận chuyển — hỗ trợ nhiều tên tham số
-var taixe   = q('taixe') || q('ten_taixe') || q('tentaixe') || q('driver_name') || '';
-var bsx     = q('bsx') || q('bks') || q('bienso') || q('license_plate') || '';
-var dtTaixe = q('dttaixe') || q('dt_taixe') || q('sodt_taixe') || q('driver_phone') || '';
+var taixe    = q('taixe') || q('ten_taixe') || q('tentaixe') || q('driver_name') || '';
+var bsx      = q('bsx') || q('bks') || q('bienso') || q('license_plate') || '';
+var dtTaixe  = q('dttaixe') || q('dt_taixe') || q('sodt_taixe') || q('driver_phone') || '';
 var soChuyen = q('sochuyen') || q('so_chuyen') || q('trip_no') || q('chuyen') || '';
 var soKe     = q('soke') || q('so_ke') || q('shelf_no') || q('ke') || '';
-var dtNhan  = q('dtnhan') || q('dt_nhan') || '';
+var dtNhan   = q('dtnhan') || q('dt_nhan') || '';
 
-set('el-sohd', soHD);
-set('el-bennhan', benNhan);
-if (taixe)    set('el-taixe', taixe);
-if (bsx)      set('el-bsx', bsx);
-if (dtNhan)   set('el-dt-nhan', dtNhan);
-if (dtTaixe)  set('el-dt-taixe', dtTaixe);
-if (soChuyen) set('el-sochuyen', soChuyen);
-if (soKe)     set('el-soke', soKe);
+fill('el-sohd', soHD);
+fill('el-bennhan', benNhan);
+fill('el-taixe', taixe);
+fill('el-bsx', bsx);
+fill('el-dt-nhan', dtNhan);
+fill('el-dt-taixe', dtTaixe);
+fill('el-sochuyen', soChuyen);
+fill('el-soke', soKe);
 
+// Ngày
 var ngayFmt = formatDate(findDate());
 if (ngayFmt) {
-  set('el-day', ngayFmt);
-} else {
-  document.getElementById('el-day').textContent = '___/___/______';
+  var elDay = document.getElementById('el-day');
+  elDay.textContent = ngayFmt;
+  elDay.style.color = '#000';
+  elDay.style.fontStyle = 'normal';
+  elDay.style.letterSpacing = 'normal';
 }
 
 // ═══════════════════════════════════════════════════════════
