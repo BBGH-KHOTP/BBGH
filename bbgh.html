@@ -218,14 +218,76 @@
   .inline-fields {
     display: flex;
     gap: 8mm;
+    flex-wrap: wrap;
   }
 
-  .field-label { font-weight: bold; }
+  .inline-fields-4 {
+    display: grid;
+    grid-template-columns: auto 1fr auto 1fr;
+    gap: 2mm 6mm;
+    align-items: baseline;
+  }
+
+  .field-label { font-weight: bold; white-space: nowrap; }
 
   .field-value {
     border-bottom: 1px solid #000;
-    min-width: 45mm;
+    min-width: 35mm;
     display: inline-block;
+    padding: 0 1mm;
+    min-height: 1.2em;
+  }
+
+  .field-value.short {
+    min-width: 25mm;
+  }
+
+  .field-value.xshort {
+    min-width: 18mm;
+  }
+
+  .vc-section {
+    margin-top: 1.5mm;
+    padding: 1.5mm 2mm;
+    border: 1px solid #999;
+    border-radius: 2px;
+    background: #fafafa;
+  }
+
+  .vc-section .vc-title {
+    font-weight: bold;
+    font-size: 9.5pt;
+    margin-bottom: 1mm;
+  }
+
+  .vc-row {
+    display: flex;
+    gap: 6mm;
+    flex-wrap: wrap;
+    margin-bottom: 0.5mm;
+  }
+
+  .vc-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .vc-item {
+    display: flex;
+    align-items: baseline;
+    gap: 1.5mm;
+  }
+
+  .vc-item .field-label {
+    font-size: 9pt;
+  }
+
+  .vc-item .field-value {
+    font-size: 9pt;
+    min-width: 30mm;
+  }
+
+  .vc-item .field-value.xshort {
+    min-width: 20mm;
   }
 
   .intro {
@@ -389,12 +451,34 @@
     <div><span class="field-label">Điện thoại: </span><span class="field-value" id="el-dt-nhan">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
   </div>
 
-  <div style="margin-top:1.5mm"><span class="party-title">C. BÊN VẬN CHUYỂN:</span></div>
-  <div class="inline-fields">
-    <div><span class="field-label">Tên tài xế: </span><span class="field-value" id="el-taixe">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
-    <div><span class="field-label">Điện thoại: </span><span class="field-value" id="el-dt-taixe">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+  <!-- ═══ PHẦN C: THÔNG TIN VẬN CHUYỂN ═══ -->
+  <div class="vc-section">
+    <div class="vc-title">C. THÔNG TIN VẬN CHUYỂN:</div>
+    <div class="vc-row">
+      <div class="vc-item">
+        <span class="field-label">Tên tài xế:</span>
+        <span class="field-value" id="el-taixe">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      </div>
+      <div class="vc-item">
+        <span class="field-label">Điện thoại:</span>
+        <span class="field-value short" id="el-dt-taixe">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      </div>
+    </div>
+    <div class="vc-row">
+      <div class="vc-item">
+        <span class="field-label">BSX:</span>
+        <span class="field-value short" id="el-bsx">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      </div>
+      <div class="vc-item">
+        <span class="field-label">Số chuyến:</span>
+        <span class="field-value xshort" id="el-sochuyen">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      </div>
+      <div class="vc-item">
+        <span class="field-label">Số kệ:</span>
+        <span class="field-value xshort" id="el-soke">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      </div>
+    </div>
   </div>
-  <div><span class="field-label">BSX: </span><span class="field-value" id="el-bsx" style="min-width:30mm;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
 </div>
 
 <div class="intro">Các bên tiến hành giao nhận hàng hóa với nội dung sau:</div>
@@ -484,7 +568,7 @@ function looksLikeDate(val) {
 // ═══════════════════════════════════════════════════════════
 // FORMAT NGÀY — TỰ ĐỘNG NHẬN DIỆN DD/MM vs MM/DD
 // ═══════════════════════════════════════════════════════════
-var _lastSwap = false; // Cờ đánh dấu đã swap
+var _lastSwap = false;
 
 function formatDate(raw) {
   _lastSwap = false;
@@ -492,32 +576,15 @@ function formatDate(raw) {
   var s = raw.trim();
   var dd, mm, yyyy;
 
-  // ── dd/mm/yyyy hoặc d/m/yyyy ──
   if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
     var p = s.split('/');
     var a = parseInt(p[0], 10);
     var b = parseInt(p[1], 10);
     yyyy = parseInt(p[2], 10);
-
-    // Nếu "tháng" > 12 → chắc chắn là MM/DD/YYYY → swap
-    if (b > 12) {
-      mm = a;
-      dd = b;
-      _lastSwap = true;
-    }
-    // Nếu "ngày" > 12 và "tháng" ≤ 12 → cũng có thể là MM/DD
-    else if (a > 12 && b <= 12) {
-      mm = a;
-      dd = b;
-      _lastSwap = true;
-    }
-    // Mặc định: DD/MM/YYYY
-    else {
-      dd = a;
-      mm = b;
-    }
+    if (b > 12) { mm = a; dd = b; _lastSwap = true; }
+    else if (a > 12 && b <= 12) { mm = a; dd = b; _lastSwap = true; }
+    else { dd = a; mm = b; }
   }
-  // ── dd-mm-yyyy ──
   else if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(s)) {
     var p = s.split('-');
     var a = parseInt(p[0], 10);
@@ -527,21 +594,14 @@ function formatDate(raw) {
     else if (a > 12 && b <= 12) { mm = a; dd = b; _lastSwap = true; }
     else { dd = a; mm = b; }
   }
-  // ── yyyy-mm-dd ──
   else if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(s)) {
     var p = s.split('-');
-    yyyy = parseInt(p[0], 10);
-    mm = parseInt(p[1], 10);
-    dd = parseInt(p[2], 10);
+    yyyy = parseInt(p[0], 10); mm = parseInt(p[1], 10); dd = parseInt(p[2], 10);
   }
-  // ── yyyy/mm/dd ──
   else if (/^\d{4}\/\d{1,2}\/\d{1,2}$/.test(s)) {
     var p = s.split('/');
-    yyyy = parseInt(p[0], 10);
-    mm = parseInt(p[1], 10);
-    dd = parseInt(p[2], 10);
+    yyyy = parseInt(p[0], 10); mm = parseInt(p[1], 10); dd = parseInt(p[2], 10);
   }
-  // ── Timestamp ──
   else if (/^\d{13}$/.test(s)) {
     var d = new Date(parseInt(s, 10));
     dd = d.getDate(); mm = d.getMonth() + 1; yyyy = d.getFullYear();
@@ -553,7 +613,6 @@ function formatDate(raw) {
   }
 
   if (!dd || !mm || !yyyy || mm < 1 || mm > 12 || dd < 1 || dd > 31) return raw;
-
   return String(dd).padStart(2, '0') + '/' + String(mm).padStart(2, '0') + '/' + yyyy;
 }
 
@@ -562,7 +621,7 @@ function formatDate(raw) {
 // ═══════════════════════════════════════════════════════════
 function findDate() {
   var keys = ['ngay','date','ngaytao','createdate','delivery_date',
-              'ngaygiao','ngay_nhap','Ngay','Date','NGAY','DATE',
+              'ngaygiao','ngay_nhan','Ngay','Date','NGAY','DATE',
               'ngay_tao','create_date','transaction_date'];
   for (var i = 0; i < keys.length; i++) {
     var v = q(keys[i]);
@@ -606,17 +665,23 @@ function findDate() {
 // ═══════════════════════════════════════════════════════════
 var soHD    = q('so') || q('sohd') || q('So') || q('SOHD') || '_______________';
 var benNhan = q('bennhan') || q('khach') || q('tennhan') || '_______________';
-var taixe   = q('taixe') || '';
-var bsx     = q('bsx') || '';
-var dtNhan  = q('dtnhan') || '';
-var dtTaixe = q('dttaixe') || '';
+
+// Thông tin vận chuyển — hỗ trợ nhiều tên tham số
+var taixe   = q('taixe') || q('ten_taixe') || q('tentaixe') || q('driver_name') || '';
+var bsx     = q('bsx') || q('bks') || q('bienso') || q('license_plate') || '';
+var dtTaixe = q('dttaixe') || q('dt_taixe') || q('sodt_taixe') || q('driver_phone') || '';
+var soChuyen = q('sochuyen') || q('so_chuyen') || q('trip_no') || q('chuyen') || '';
+var soKe     = q('soke') || q('so_ke') || q('shelf_no') || q('ke') || '';
+var dtNhan  = q('dtnhan') || q('dt_nhan') || '';
 
 set('el-sohd', soHD);
 set('el-bennhan', benNhan);
-if (taixe)   set('el-taixe', taixe);
-if (bsx)     set('el-bsx', bsx);
-if (dtNhan)  set('el-dt-nhan', dtNhan);
-if (dtTaixe) set('el-dt-taixe', dtTaixe);
+if (taixe)    set('el-taixe', taixe);
+if (bsx)      set('el-bsx', bsx);
+if (dtNhan)   set('el-dt-nhan', dtNhan);
+if (dtTaixe)  set('el-dt-taixe', dtTaixe);
+if (soChuyen) set('el-sochuyen', soChuyen);
+if (soKe)     set('el-soke', soKe);
 
 var ngayFmt = formatDate(findDate());
 if (ngayFmt) {
