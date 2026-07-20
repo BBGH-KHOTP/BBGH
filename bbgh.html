@@ -663,7 +663,7 @@ var benNhan = q('bennhan') || q('khach') || q('tennhan') || '';
 
 var taixe    = q('taixe') || q('ten_taixe') || q('tentaixe') || q('driver_name') || '';
 var bsx      = q('bsx') || q('bks') || q('bienso') || q('license_plate') || '';
-var dtTaixe  = q('dttaixe') || q('dt_taixe') || q('sodt_taixe') || q('driver_phone') || '';
+var dtTaixe  = q('sdt') || q('dttaixe') || q('dt_taixe') || q('sodt_taixe') || q('driver_phone') || ''; // SỬA TẠI ĐÂY (Thêm q('sdt'))
 var soChuyen = q('sochuyen') || q('so_chuyen') || q('trip_no') || q('chuyen') || '';
 var soKe     = q('soke') || q('so_ke') || q('shelf_no') || q('ke') || '';
 var dtNhan   = q('dtnhan') || q('dt_nhan') || '';
@@ -673,7 +673,7 @@ fill('el-bennhan', benNhan);
 fill('el-taixe', taixe);
 fill('el-bsx', bsx);
 fill('el-dt-nhan', dtNhan);
-fill('el-dt-taixe', dtTaixe);
+fill('el-sdt', dtTaixe); // SỬA TẠI ĐÂY (Đổi el-dt-taixe thành el-sdt)
 fill('el-sochuyen', soChuyen);
 fill('el-soke', soKe);
 
