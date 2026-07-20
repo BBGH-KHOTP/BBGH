@@ -223,7 +223,7 @@
 
   .field-label { font-weight: bold; white-space: nowrap; }
 
-  /* ── Placeholder: chỉ chấm xám mờ, không gạch chân, không khung ── */
+  /* ── Placeholder ── */
   .field-value {
     border-bottom: none;
     min-width: 35mm;
@@ -246,7 +246,7 @@
   .field-value.xshort { min-width: 18mm; }
   .field-value.xlong  { min-width: 55mm; }
 
-  /* ── Phần C: không khung, không nền ── */
+  /* ── Phần C: Thông tin vận chuyển ── */
   .vc-section {
     margin-top: 1.5mm;
   }
@@ -304,14 +304,16 @@
     line-height: 1.3;
   }
 
-  td.stt, th:nth-child(1) { width: 5%; text-align: center; }
-  td.masp, th:nth-child(4) { width: 11%; text-align: center; }
-  td.dvt, th:nth-child(6) { width: 6%; text-align: center; }
-  td.sl, th:nth-child(7) { width: 7%; text-align: center; font-weight: bold; white-space: normal; }
-  td.lsx, th:nth-child(2) { width: 16%; text-align: center; }
-  td.po,  th:nth-child(3) { width: 16%; text-align: center; }
-  td.ten  { text-align: left; width: 22%; }
-  td.ghichu { text-align: left; width: 17%; }
+  /* ── Định dạng lại tỉ lệ các cột trong bảng ── */
+  td.stt,    th:nth-child(1) { width: 5%;  text-align: center; font-weight: bold; }
+  td.lsx,    th:nth-child(2) { width: 14%; text-align: center; font-weight: bold; }
+  td.po,     th:nth-child(3) { width: 13%; text-align: center; }
+  td.masp,   th:nth-child(4) { width: 12%; text-align: center; }
+  td.ten,    th:nth-child(5) { width: 28%; text-align: left; }
+  td.dvt,    th:nth-child(6) { width: 8%;  text-align: center; }
+  td.sl,     th:nth-child(7) { width: 8%;  text-align: center; font-weight: bold; }
+  td.muc,    th:nth-child(8) { width: 6%;  text-align: center; }
+  td.ghichu, th:nth-child(9) { width: 10%; text-align: left; }
 
   .row-total td {
     font-weight: bold;
@@ -362,11 +364,6 @@
   }
 
   .sig-space { height: 16mm; }
-
-  .sig-name {
-    font-size: 8.5pt;
-    font-weight: bold;
-  }
 
   @media print {
     body { padding: 0; }
@@ -437,7 +434,6 @@
     <div><span class="field-label">Điện thoại: </span><span class="field-value" id="el-dt-nhan">..........</span></div>
   </div>
 
-  <!-- ═══ PHẦN C: THÔNG TIN VẬN CHUYỂN — không khung ═══ -->
   <div class="vc-section">
     <div class="vc-title">C. THÔNG TIN VẬN CHUYỂN:</div>
     <div class="vc-row">
@@ -472,13 +468,14 @@
 <table>
   <thead>
     <tr>
-      <th>MỤC</th>
+      <th>TT</th>
       <th>LSX-ĐH</th>
       <th>SỐ PO</th>
       <th>MÃ SP</th>
       <th>TÊN CHI TIẾT</th>
       <th>ĐVT</th>
       <th>SL</th>
+      <th>MỤC</th>
       <th>GHI CHÚ</th>
     </tr>
   </thead>
@@ -487,7 +484,7 @@
     <tr class="row-total">
       <td colspan="6">Tổng cộng</td>
       <td id="tong-sl"></td>
-      <td></td>
+      <td colspan="2"></td>
     </tr>
   </tfoot>
 </table>
@@ -534,9 +531,7 @@
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════════
 // DEBUG
-// ═══════════════════════════════════════════════════════════
 function toggleDebug() {
   document.getElementById('debugPanel').classList.toggle('open');
   document.getElementById('btnDebug').classList.toggle('active');
@@ -545,9 +540,6 @@ function toggleDebug() {
 var urlParams = new URLSearchParams(window.location.search);
 function q(name) { return urlParams.get(name) || ''; }
 
-/**
- * Điền dữ liệu — có giá trị thì đen bình thường, không thì giữ "......." xám mờ
- */
 function fill(id, val) {
   var el = document.getElementById(id);
   if (!el) return;
@@ -562,11 +554,8 @@ function looksLikeDate(val) {
   return /^(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}|\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2})$/.test(val.trim());
 }
 
-// ═══════════════════════════════════════════════════════════
 // FORMAT NGÀY
-// ═══════════════════════════════════════════════════════════
 var _lastSwap = false;
-
 function formatDate(raw) {
   _lastSwap = false;
   if (!raw) return '';
@@ -611,9 +600,7 @@ function formatDate(raw) {
   return String(dd).padStart(2, '0') + '/' + String(mm).padStart(2, '0') + '/' + yyyy;
 }
 
-// ═══════════════════════════════════════════════════════════
 // TÌM NGÀY
-// ═══════════════════════════════════════════════════════════
 function findDate() {
   var keys = ['ngay','date','ngaytao','createdate','delivery_date',
               'ngaygiao','ngay_nhan','Ngay','Date','NGAY','DATE',
@@ -629,9 +616,7 @@ function findDate() {
   return found || '';
 }
 
-// ═══════════════════════════════════════════════════════════
 // BUILD DEBUG
-// ═══════════════════════════════════════════════════════════
 (function buildDebug() {
   var c = document.getElementById('debugContent');
   var h = '<div class="dbg-section">── Tham số URL ──</div>';
@@ -655,15 +640,13 @@ function findDate() {
   c.innerHTML = h;
 })();
 
-// ═══════════════════════════════════════════════════════════
-// ĐIỀN DỮ LIỆU
-// ═══════════════════════════════════════════════════════════
+// ĐIỀN DỮ LIỆU BÊN NGHỆ DỤNG THÔNG TIN
 var soHD    = q('so') || q('sohd') || q('So') || q('SOHD') || '';
 var benNhan = q('bennhan') || q('khach') || q('tennhan') || '';
 
 var taixe    = q('taixe') || q('ten_taixe') || q('tentaixe') || q('driver_name') || '';
 var bsx      = q('bsx') || q('bks') || q('bienso') || q('license_plate') || '';
-var dtTaixe  = q('sdt') || q('dttaixe') || q('dt_taixe') || q('sodt_taixe') || q('driver_phone') || ''; // SỬA TẠI ĐÂY (Thêm q('sdt'))
+var dtTaixe  = q('sdt') || q('dttaixe') || q('dt_taixe') || q('sodt_taixe') || q('driver_phone') || '';
 var soChuyen = q('sochuyen') || q('so_chuyen') || q('trip_no') || q('chuyen') || '';
 var soKe     = q('soke') || q('so_ke') || q('shelf_no') || q('ke') || '';
 var dtNhan   = q('dtnhan') || q('dt_nhan') || '';
@@ -673,7 +656,7 @@ fill('el-bennhan', benNhan);
 fill('el-taixe', taixe);
 fill('el-bsx', bsx);
 fill('el-dt-nhan', dtNhan);
-fill('el-sdt', dtTaixe); // SỬA TẠI ĐÂY (Đổi el-dt-taixe thành el-sdt)
+fill('el-sdt', dtTaixe);
 fill('el-sochuyen', soChuyen);
 fill('el-soke', soKe);
 
@@ -687,14 +670,13 @@ if (ngayFmt) {
   elDay.style.letterSpacing = 'normal';
 }
 
-// ═══════════════════════════════════════════════════════════
 // BẢNG HÀNG HÓA
-// ═══════════════════════════════════════════════════════════
 var rawItems = q('items');
 var tbody = document.getElementById('table-body');
 var tongSL = 0;
 
 if (rawItems) {
+  var idx = 1;
   rawItems.replace(/,(\s*\|\|)/g, '$1').split('||').forEach(function(row) {
     var c = row.trim();
     if (!c || c === ',') return;
@@ -705,39 +687,50 @@ if (rawItems) {
     tongSL += (parseFloat(cols[5]) || 0);
     var tr = document.createElement('tr');
     tr.innerHTML =
-      '<td class="stt">'    + (cols[1]||'') + '</td>' +
-      '<td class="lsx">'    + (cols[0]||'') + '</td>' +
-      '<td class="po">'     + (cols[6]||'') + '</td>' +
-      '<td class="masp">'   + (cols[2]||'') + '</td>' +
-      '<td class="ten">'    + (cols[3]||'') + '</td>' +
-      '<td class="dvt">'    + (cols[4]||'') + '</td>' +
-      '<td class="sl">'     + (cols[5]||'') + '</td>' +
-      '<td class="ghichu">' + (cols[7]||'') + '</td>';
+      '<td class="stt">'    + idx + '</td>' +                // 1. TT (Tự tăng theo dòng)
+      '<td class="lsx">'    + (cols[0]||'') + '</td>' +      // 2. LSX
+      '<td class="po">'     + (cols[6]||'') + '</td>' +      // 3. PO
+      '<td class="masp">'   + (cols[2]||'') + '</td>' +      // 4. Mã SP
+      '<td class="ten">'    + (cols[3]||'') + '</td>' +      // 5. Tên chi tiết
+      '<td class="dvt">'    + (cols[4]||'') + '</td>' +      // 6. ĐVT
+      '<td class="sl">'     + (cols[5]||'') + '</td>' +      // 7. Số lượng
+      '<td class="muc">'    + (cols[1]||'') + '</td>' +      // 8. MỤC (Lấy dữ liệu từ cols[1])
+      '<td class="ghichu">' + (cols[7]||'') + '</td>';       // 9. Ghi chú
     tbody.appendChild(tr);
+    idx++;
   });
 } else {
-  [['TBNN.15/06','1','CKM7-4','Bulong 12x50 ren 40 mạ đen','CT',100,'BBGH02072026-AD2-001','Kết cấu kệ kho mát 2'],
-   ['TBNN.15/06','2','CKM7-4','Bulong 12x50 ren 40 mạ đen','CT',1,'BBGH02072026-AD2-001','Kết cấu kệ kho mát 2']].forEach(function(d) {
+  var defaultItems = [
+    ['TBNN.15/06','1','CKM7-4','Bulong 12x50 ren 40 mạ đen','CT',100,'BBGH02072026-AD2-001','Kết cấu kệ kho mát 2'],
+    ['TBNN.15/06','2','CKM7-4','Bulong 12x50 ren 40 mạ đen','CT',1,'BBGH02072026-AD2-001','Kết cấu kệ kho mát 2']
+  ];
+  
+  defaultItems.forEach(function(d, i) {
     tongSL += d[5];
     var tr = document.createElement('tr');
     tr.innerHTML =
-      '<td class="stt">'    + d[1] + '</td><td class="lsx">' + d[0] + '</td>' +
-      '<td class="po">'     + d[6] + '</td><td class="masp">' + d[2] + '</td>' +
-      '<td class="ten">'    + d[3] + '</td><td class="dvt">'  + d[4] + '</td>' +
-      '<td class="sl">'     + d[5] + '</td><td class="ghichu">' + d[7] + '</td>';
+      '<td class="stt">'    + (i + 1) + '</td>' + // 1. TT
+      '<td class="lsx">'    + d[0] + '</td>' +    // 2. LSX
+      '<td class="po">'     + d[6] + '</td>' +    // 3. PO
+      '<td class="masp">'   + d[2] + '</td>' +    // 4. Mã SP
+      '<td class="ten">'    + d[3] + '</td>' +    // 5. Tên
+      '<td class="dvt">'    + d[4] + '</td>' +    // 6. ĐVT
+      '<td class="sl">'     + d[5] + '</td>' +    // 7. SL
+      '<td class="muc">'    + d[1] + '</td>' +    // 8. MỤC
+      '<td class="ghichu">' + d[7] + '</td>';     // 9. Ghi chú
     tbody.appendChild(tr);
   });
 }
 
 document.getElementById('tong-sl').textContent = tongSL || '';
 
-// ═══════════════════════════════════════════════════════════
-// GỘP Ô TRÙNG
-// ═══════════════════════════════════════════════════════════
+// GỘP Ô TRÙNG (Tự động gộp ô trùng cho LSX, PO và Ghi chú)
 (function() {
   var rows = tbody.getElementsByTagName('tr');
   if (rows.length <= 1) return;
-  [1, 2, 7].forEach(function(ci) {
+  
+  // Chỉ số cột áp dụng gộp ô trùng: 1 (LSX), 2 (PO), 8 (Ghi chú)
+  [1, 2, 8].forEach(function(ci) {
     var anchor = null, span = 1;
     for (var i = 0; i < rows.length; i++) {
       var cell = rows[i].cells[ci];
