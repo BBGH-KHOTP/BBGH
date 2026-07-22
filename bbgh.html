@@ -639,7 +639,7 @@ function findDate() {
 // ĐIỀN DỮ LIỆU BÊN NGHỆ DỤNG THÔNG TIN
 var soHD    = q('so') || q('sohd') || q('So') || q('SOHD') || '';
 var benNhan = q('bennhan') || q('khach') || q('tennhan') || '';
-
+var diaChiNhan = q('diachi-nhan') || ''; // Đã sửa: bỏ dấu gạch ngang trong tên biến
 var taixe    = q('taixe') || q('ten_taixe') || q('tentaixe') || q('driver_name') || '';
 var bsx      = q('bsx') || q('bks') || q('bienso') || q('license_plate') || '';
 var dtTaixe  = q('sdt') || q('dttaixe') || q('dt_taixe') || q('sodt_taixe') || q('driver_phone') || '';
@@ -649,6 +649,7 @@ var dtNhan   = q('dtnhan') || q('dt_nhan') || '';
 
 fill('el-sohd', soHD);
 fill('el-bennhan', benNhan);
+fill('el-diachi-nhan', diaChiNhan); // Đã sửa: đổi tên biến cho khớp
 fill('el-taixe', taixe);
 fill('el-bsx', bsx);
 fill('el-dt-nhan', dtNhan);
